@@ -1,5 +1,5 @@
-# Used packages
-library("shiny", "shinythemes", "plotly", "data.table", "shinyWidgets", "shinydashboard", "ggplot2", "forcats", "markdown")
+# Carregando pacotes
+lapply(c("shiny", "shinythemes", "plotly", "data.table", "shinyWidgets", "shinydashboard", "ggplot2", "forcats", "markdown"), require, character.only = TRUE)
 
 # Carrega dados
 load("data/peso.rda")
