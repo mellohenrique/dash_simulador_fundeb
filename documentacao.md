@@ -1,3 +1,10 @@
+# Aplicativo Simulador Fundeb
+
+O aplicativo simulador do Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação (FUNDEB) é um aplicativo utilizado para estimar o funcionamento deste fundo de acordo com diferentes parâmetros definidos pelo usuário. O aplicativo utiliza dados disponibilizados pelo Fundo Nacional de Desenvolvimento da Educação (FNDE) para calcular o montante de distribuido para cade ente nacional e como é feita a complementação da União. Dois projetos são utilizados para a criação deste aplicativo:
+
+* O próprio aplicativo em _Shiny_ cujo código pode ser obtido no link do [simulador_fundeb](https://github.com/mellohenrique/dash-simulador-fundeb);
+* O pacote em R criado para fazer as simulações [simulador.fundeb2](https://github.com/mellohenrique/simulador.fundeb2).
+
 # Fonte
 
 * Os dados de alunos foram retirados da [portaria interministerial número 3, de 24/05/2021](https://www.fnde.gov.br/index.php/financiamento/fundeb/consultas/item/14177-2021-com-base-na-portaria-interministerial-n%C2%BA-3,-de-24-05-2021);
@@ -19,3 +26,4 @@ Dado o montante $u$ passado pela União para equalizar os fundos, obseva-se $u >
 $x_i = (a_i, m_i = \frac{a_i * M}{\sum_1^ia_t}, v_i = \frac{M}{\sum_1^ia_t})$
 
 Os fundos $x_1, ..., x_i$ equalizados são unidos aos fundos $x_{i+1}, ..., x_k$ não equalizados. Caso $u > n_i, \forall i$ todos os fundo participam dessa equalização
+
