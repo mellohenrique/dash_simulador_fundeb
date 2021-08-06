@@ -1,6 +1,9 @@
+# Carregando pacotes
 library(forcats)
 
+# Inicio do Server
 shinyServer(function(input, output) {
+  ## Cria sliders com pesos para UI
   output$pesos = renderUI({
     lapply(1:length(peso$etapa), function(i) {
       sliderInput(
@@ -13,6 +16,7 @@ shinyServer(function(input, output) {
     })
   })
   
+  ## Cria tabela de pesos usada no servidor
   pesos_app = reactive({
     req(input$etapa_30)
     
@@ -23,6 +27,7 @@ shinyServer(function(input, output) {
                              }))
   })
   
+  # Simula fundeb com parametros dados pelo usuario
   simulacao = reactive(
     simulador.fundeb2::simula_fundeb(
       dados_fnde = alunos,
@@ -38,24 +43,30 @@ shinyServer(function(input, output) {
     )
   )
   
+  ## Valores para Infoboxes
+  ### Calcula valor maximo do VAAT para info box
   output$max_vaat = renderUI({
     prettyNum(max(simulacao()$vaat), big.mark = ".", decimal.mark = ",")
   })
   
+  ### Calcula minimo VAAT para info box
   output$min_vaat = renderUI({
     prettyNum(min(simulacao()$vaat), big.mark = ".", decimal.mark = ",")
   })
   
+  ### Calcula minimo VAAF para info box
   output$min_vaaf = renderUI({
     prettyNum(max(simulacao()$vaaf), big.mark = ".", decimal.mark = ",")
   })
   
+  ## Gráfico com aporte da federação por UF
   output$aporte_federal = plotly::renderPlotly({
+    ### Calculo do aporte por unidade da federação
     aporte_uf = melt(simulacao()[, .(
       aporte_vaaf = sum(fundo_vaaf - fundeb),
       aporte_vaat = sum(fundo_vaat - fundo_vaaf_extra)
     ), by = uf][, `:=`(aporte_vaaf = ifelse(aporte_vaaf < 1, 0 , aporte_vaaf), aporte_vaat = ifelse(aporte_vaat < 1, 0 , aporte_vaat))], id.vars = "uf")
-    
+    ### Geração do gráfico em plotly
     plotly::ggplotly(ggplot(aporte_uf, aes(x = fct_reorder(uf, value), y = value, fill = variable)) +
                        geom_col() +
                        coord_flip() +
@@ -64,8 +75,7 @@ shinyServer(function(input, output) {
                        scale_fill_viridis_d(end = 0.8, begin = .2))
   })
   
-
-  
+  ### Tabela DT
   output$simulacao_dt = DT::renderDT(
     simulacao(),
     server = FALSE,
