@@ -5,3 +5,4 @@ lapply(c("shiny", "shinythemes", "plotly", "data.table", "shinyWidgets", "shinyd
 load("data/peso.rda")
 load("data/alunos.rda")
 load("data/complementar.rda")
+load("data/simulacao-inicial.rda")

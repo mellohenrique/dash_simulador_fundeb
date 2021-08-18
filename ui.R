@@ -4,6 +4,7 @@ shinyUI(
   navbarPage(
     ### Define Tema
     theme = shinytheme("flatly"),
+    selected = "Simulação",
     shinyWidgets::useShinydashboard(),
     ### Barra 1
     title = "Simulador Fundeb",
@@ -11,7 +12,8 @@ shinyUI(
       title = "Simulação",
       sidebarPanel(
         ### Complementacao da União
-        h2("Aporte da União"),
+        actionButton("botao", "Simular"),
+        h2("Complementação da União"),
         numericInput(
           "complementacao_vaaf",
           "Montante da Complementação VAAF:",
@@ -27,16 +29,16 @@ shinyUI(
         sliderInput(
           "social",
           "Parâmetros Social:",
-          min = .7,
+          min = 1,
           max = 2,
-          value = c(1, 1.3)
+          value = c(1.3)
         ),
         sliderInput(
           "fiscal",
           "Parâmetros Fiscal:",
-          min = .7,
+          min = 1,
           max = 2,
-          value = c(1, 1.3)
+          value = c(1.3)
         ),
         # Pesos por etapa e modalidade
         h2("Fator por tipo e modalidade"),
@@ -54,25 +56,18 @@ shinyUI(
             color = "green",
             fill = TRUE
           ),
-          shinydashboard::infoBox(
+            shinydashboard::infoBox(
             "Mínimo VAAT",
             uiOutput("min_vaat"),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
-          ),
-          shinydashboard::infoBox(
-            "Mínimo VAAF",
-            uiOutput("min_vaaf"),
-            icon = icon("line-chart"),
-            color = "green",
-            fill = TRUE
           )
         ),
-        ### Gráfico com aporte de recursos por unidade da federação
-        plotly::plotlyOutput("aporte_federal"),
+        ### Gráfico com complementação de recursos por unidade da federação
+        shinycssloaders::withSpinner(plotly::plotlyOutput("complementacao_federal")),
         ### Tabela com resultados da simulação
-        DT::dataTableOutput("simulacao_dt")
+        shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))
         
       )
       

@@ -1,5 +1,7 @@
 # Carregando pacotes
 library(forcats)
+library(markdown)
+library(shinythemes)
 
 # Inicio do Server
 shinyServer(function(input, output) {
@@ -10,8 +12,8 @@ shinyServer(function(input, output) {
         label = peso$etapa_nome[[i]],
         inputId = paste0("etapa_", i),
         min = 0.8,
-        max = 2,
-        value = peso$peso_alt[[i]]
+        max = 3.5,
+        value = c(peso$peso_vaaf[[i]])
       )
     })
   })
@@ -20,28 +22,39 @@ shinyServer(function(input, output) {
   pesos_app = reactive({
     req(input$etapa_30)
     
-    data.frame(etapa = peso$etapa,
-               peso = sapply(1:length(peso$etapa),
-                             function(i) {
-                               input[[paste0("etapa_", i)]]
-                             }))
+  pesos = data.frame(
+      etapa = peso$etapa,
+      peso_vaaf = sapply(1:length(peso$etapa),
+                         function(i) {
+                           input[[paste0("etapa_", i)]][[1]]
+                         }))
+  
+  pesos$peso_vaat = pesos$peso_vaaf * c(1.5, 1.5, 1.5, 1.5, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5, 1.5, 1.5, 1.5, 1, 1, 1, 1, 1)
+  
+  pesos
+    
   })
   
+  
   # Simula fundeb com parametros dados pelo usuario
-  simulacao = reactive(
+  simulacao = reactive({
+    if (input$botao == 0) {
+      simulacao_inicial
+    } else { 
+      simulacao_realizada()}})
+  
+  simulacao_realizada = eventReactive(input$botao, {
     simulador.fundeb2::simula_fundeb(
       dados_fnde = alunos,
       dados_complementar = complementar,
       peso_etapas = pesos_app(),
-      chao_socio = input$social[[1]],
-      teto_socio = input$social[[2]],
-      chao_fiscal = input$fiscal[[1]],
-      teto_fiscal = input$fiscal[[2]],
-      aporte_vaaf = input$complementacao_vaaf,
-      aporte_vaat = input$complementacao_vaat
-      
-    )
-  )
+      chao_socio = 1,
+      teto_socio = input$social,
+      chao_fiscal = 1,
+      teto_fiscal = input$fiscal,
+      complementacao_vaaf = input$complementacao_vaaf,
+      complementacao_vaat = input$complementacao_vaat
+    )})
   
   ## Valores para Infoboxes
   ### Calcula valor maximo do VAAT para info box
@@ -54,23 +67,18 @@ shinyServer(function(input, output) {
     prettyNum(min(simulacao()$vaat), big.mark = ".", decimal.mark = ",")
   })
   
-  ### Calcula minimo VAAF para info box
-  output$min_vaaf = renderUI({
-    prettyNum(max(simulacao()$vaaf), big.mark = ".", decimal.mark = ",")
-  })
-  
-  ## Gráfico com aporte da federação por UF
-  output$aporte_federal = plotly::renderPlotly({
-    ### Calculo do aporte por unidade da federação
-    aporte_uf = melt(simulacao()[, .(
-      aporte_vaaf = sum(fundo_vaaf - fundeb),
-      aporte_vaat = sum(fundo_vaat - fundo_vaaf_extra)
-    ), by = uf][, `:=`(aporte_vaaf = ifelse(aporte_vaaf < 1, 0 , aporte_vaaf), aporte_vaat = ifelse(aporte_vaat < 1, 0 , aporte_vaat))], id.vars = "uf")
+  ## Gráfico com complementação da federação por UF
+  output$complementacao_federal = plotly::renderPlotly({
+    ### Calculo do complementacao por unidade da federação
+    complementacao_uf = melt(simulacao()[, .(
+      complementacao_vaaf = sum(fundo_vaaf - fundeb),
+      complementacao_vaat = sum(fundo_vaat - fundo_vaaf_extra)
+    ), by = uf][, `:=`(complementacao_vaaf = ifelse(complementacao_vaaf < 1, 0 , complementacao_vaaf), complementacao_vaat = ifelse(complementacao_vaat < 1, 0 , complementacao_vaat))], id.vars = "uf")
     ### Geração do gráfico em plotly
-    plotly::ggplotly(ggplot(aporte_uf, aes(x = fct_reorder(uf, value), y = value, fill = variable)) +
+    plotly::ggplotly(ggplot(complementacao_uf, aes(x = fct_reorder(uf, value), y = value, fill = variable)) +
                        geom_col() +
                        coord_flip() +
-                       labs(x = "UF", y = "Aporte Federal") +
+                       labs(x = "UF", y = "complementacao Federal") +
                        scale_y_continuous(labels = scales::number_format(big.mark = ".", decimal.mark = ",")) +
                        scale_fill_viridis_d(end = 0.8, begin = .2))
   })
