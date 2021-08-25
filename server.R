@@ -153,21 +153,22 @@ shinyServer(function(input, output) {
       media_vaat = mean(VAAT)),
       by = "UF"][,uf:= fct_reorder(UF, maximo_vaat)]
     
-    fig = plot_ly(dados, y = ~minimo_vaat, x = ~uf, name = "Mínimo VAAT", type = 'scatter', meta = "VAAT Mínimo da UF",
-                   mode = "markers", marker = list(color = "pink"),
-                   hovertemplate = "UF: %{x}<br>%{meta}: %{y:,.2f}<extra></extra>")
+    fig = plot_ly(dados, y = ~maximo_vaat, x = ~uf, name = "Máximo VAAT", type = 'scatter', meta = "VAAT Máximo da UF",
+                   mode = "markers", marker = list(color = "blue"),
+                   hovertemplate = "%{meta}: %{y:,.2f}<extra></extra>")
     
     fig = add_trace(fig, y = ~media_vaat, x = ~uf, name = "Média VAAT",type = 'scatter', meta = "VAAT Médio da UF",
-                     mode = "markers", marker = list(color = "red"))
+                     mode = "markers", marker = list(color = "green"))
     
-    fig = add_trace(fig, y = ~maximo_vaat, x = ~uf, name = "Máximo VAAT",type = 'scatter', meta = "VAAT Máximo da UF",
-                     mode = "markers", marker = list(color = "blue"))
+    fig = add_trace(fig, y = ~minimo_vaat, x = ~uf, name = "Mínimo VAAT",type = 'scatter', meta = "VAAT Mínimo da UF",
+                     mode = "markers", marker = list(color = "orange"))
     
     layout(fig,
            title = "Dispersão do Valor VAAT por UF",
            xaxis = list(title = ""),
            yaxis = list(title = "Valor em Reais", tickformat = ',.2f'),
-           separators = ',.')
+           separators = ',.',
+           hovermode = "x unified")
   })
   
   ### Tabela DT ----
