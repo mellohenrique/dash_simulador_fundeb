@@ -17,12 +17,14 @@ shinyUI(
         numericInput(
           "complementacao_vaaf",
           "Montante da Complementação VAAF:",
-          value = 16000000000
+          value = 16000000000,
+          min = 0,
         ),
         numericInput(
           "complementacao_vaat",
           "Montante da Complementação VAAT:",
-          value = 3000000000
+          value = 3000000000,
+          min = 0
         ),
         ### Parametros fiscais e sociais
         h2("Fator por parâmetro social e fiscal"),
@@ -50,22 +52,31 @@ shinyUI(
         ### Linha com os infoboxes
         fluidRow(
           shinydashboard::infoBox(
-            "Máximo VAAT",
-            uiOutput("max_vaat"),
+            "VAAT Máximo",
+            uiOutput("box_max_vaat"),
+            icon = icon("line-chart"),
+            color = "green",
+            fill = TRUE
+          ),
+          shinydashboard::infoBox(
+            "VAAT Médio",
+            uiOutput("box_media_vaat"),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
           ),
             shinydashboard::infoBox(
-            "Mínimo VAAT",
-            uiOutput("min_vaat"),
+            "VAAT Mínimo",
+            uiOutput("box_min_vaat"),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
           )
         ),
         ### Gráfico com complementação de recursos por unidade da federação
-        shinycssloaders::withSpinner(plotly::plotlyOutput("complementacao_federal")),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_federal")),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_vaat_medio")),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao")),
         ### Tabela com resultados da simulação
         shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))
         
