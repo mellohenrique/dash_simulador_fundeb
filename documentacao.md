@@ -17,7 +17,12 @@ A equalização dos fundos é realizada em duas etapas subsequentes:
 1. Etapa VAAT em que são equalizados os fundos estaduais por valor aluno ano;
 2. Etapa VAAF em que são equalizados os fundos dos entes por valor aluno ano.
 
+## Etapa VAAT 
+
+
 As duas equalizaçõesa são realizadas de forma semelhante, com o fundo com o menor aluno ano recebendo verbas até ter o mesmo valor que o fundo com o segundo menor valor aluno ano, então os dois fundos com menor aluno ano recebem um montante até ficarem com o mesmo valor que o terceiro fundo com o menor aluno ano. Esse processo é repetido até todo o montante destinado a equalização se esgotar.
+
+## Formulação matemática da equalização
 
 A equalização é realizada dentro da simulação da seguinte forma, seja $X$ um conjunto de fundos ordenado $X = (x_1, x_2, ..., x_k)$ sendo $k$ o número de entes do fundo, cada fundo um vetor com três valores, $x_i = (a_i, m_i, v_i)$, sendo $x_i$ o fundo do ente $i$, $a_i$ o número de alunos do ente $i$ e $v_i$ o valor por aluno do fundo, ou seja, $m_i/a_i$. Seja $X$ ordenado de forma crescente pelo valor por alunom ou seja, $a_i < a_j; \forall i,j; i<j$. Calcula-se um vetor $N = (n_1, n_2, ..., n_{k-1})$, com $n_i = \sum_1^i a_t * v_{i+1}$, ou seja, o número total de alunos de todos os fundos com menor valor por aluno que o fundo considerado multiplicado pelo valor de aluno do fundo logo em sequência que recebe mais por aluno. Isso nós dá um vetor $N = (n_1, n_2, ..., n_k)$ com o $n_i$ sendo o montante necessário para realizar uma equalização dos $i$ fundos mais pobres com o valor por aluno do fundo $i+1$.
 
