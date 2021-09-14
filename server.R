@@ -1,7 +1,4 @@
 # Carregando pacotes ----
-library(forcats)
-library(markdown)
-library(shinythemes)
 
 # Inicio do Server ----
 shinyServer(function(input, output) {
@@ -78,10 +75,10 @@ shinyServer(function(input, output) {
     #### Altera nomes para padrao externo ----
     setnames(simulacao,
              names(simulacao),
-             c("UF", "Ibge", "Alunos", "Alunos ponderados etapa VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT", "VAAT"))
+             c("UF", "Ibge", "Alunos", "Alunos ponderados etapa VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT", "VAAT", "VAA"))
 
     #### Altera ordem para padrao externo ----    
-    setcolorder(simulacao, c("UF", "Ibge", "Município", "VAAT", "Alunos", "Alunos ponderados etapa VAAF", "Alunos ponderados VAAT", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT"))
+    setcolorder(simulacao, c("UF", "Ibge", "Município", "VAAT", "Alunos", "Alunos ponderados etapa VAAF", "Alunos ponderados VAAT", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT", "VAA"))
     
     #### Retorna resultado da simulacao----
     simulacao
@@ -103,6 +100,20 @@ shinyServer(function(input, output) {
     prettyNum(min(simulacao()$VAAT), big.mark = ".", decimal.mark = ",")
   })
   
+  ### Calcula media VAAT do quintil SAEB para info box ----
+  output$box_mean_vaat_quintil = renderUI({
+    prettyNum(mean(simulacao()[Ibge %in% codigos_ibge,]$VAAT), big.mark = ".", decimal.mark = ",")
+  })
+  ### Calcula media VAAT do quintil SAEB para info box ----
+  output$box_compl_municipal = renderUI({
+    prettyNum(sum(simulacao()[Ibge > 100,]$`Montante VAAT`) - valor_fundo_total[estado == FALSE,]$total_fundo, big.mark = ".", decimal.mark = ",")
+  })
+  
+  ### Calcula media VAAT do quintil SAEB para info box ----
+  ### Calcula media VAAT do quintil SAEB para info box ----
+  output$box_compl_estadual = renderUI({
+    prettyNum(sum(simulacao()[Ibge < 100,]$`Montante VAAT`) - valor_fundo_total[estado == TRUE,]$total_fundo, big.mark = ".", decimal.mark = ",")
+  })
   
   ## Gráfico com complementação da federação por UF ----
   output$graf_complementacao_federal = plotly::renderPlotly({
@@ -115,35 +126,61 @@ shinyServer(function(input, output) {
     fig = plot_ly(
       complementacao_uf,
       x = ~UF,
-      y = ~value,
+      y = ~value/1000000,
       name = ~variable,
       type = "bar",
       meta = ~variable,
-      hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y}<extra></extra>"
+      hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = ""), yaxis = list(title = "Montante", tickformat = ',.2f'), title = "Complementação da União por UF e Modalidade")
+    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = ""), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "Complementação da União por UF e Modalidade")
     
     fig 
   })
   
-  ### Grafico média ----
-  output$graf_vaat_medio = renderPlotly({
-    vaat_media = simulacao()[, .(VAAT = mean(VAAT)), by = UF][,UF := fct_reorder(UF, VAAT)]
+  ## Gráfico da dispersão do VAAT por ente ----
+  output$graf_dispersao_ente = plotly::renderPlotly({
+    ### Calculo do complementacao por unidade da federação ----
+    simulacao_ordenada = setorder(simulacao(), VAAT)
+    simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
     
-    fig = plot_ly(
-      vaat_media,
-      x = ~UF,
-      y = ~VAAT,
-      type = "bar",
-      hovertemplate = "UF: %{label}<br>VAAT: %{y}<extra></extra>"
-    )
+    fig = plot_ly(simulacao_ordenada,
+                  x = ~ordem,
+                  y = ~VAAT,
+                  text = ~Município,
+                  hovertemplate = "Nome do ente: %{text}<br>VAAT: %{y}<extra></extra>",
+                  type = "scatter")
+    
+    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes"), yaxis = list(title = "VAAT", tickformat = ',.2f', range = list(0, 1.1*max(simulacao_ordenada$VAAT))), title = "VAAT por ente")
+    
+    fig
+  }) 
+  
+  ### Gráfico decil ----
+  output$graf_decil_saeb = plotly::renderPlotly({
+    ### Calculo do complementacao por unidade da federação ----
+    simulacao_decil = simulacao()[complementar, indicador_social := fator_social, on = "Ibge"]
+    
+    simulacao_decil[, decil := cut(indicador_social, quantile(indicador_social, probs = 0:10/10),
+                         labels = c("1º Decil", "2º Decil", "3º Decil", "4º Decil", "5º Decil", "6º Decil", "7º Decil", "8º Decil", "9º Decil", "10º Decil"), include.lowest = TRUE, ordered_result	
+                         = TRUE)]
     
     
-    fig = layout(fig, separators = ',.', title = "VAAT Médio UF")
+    simulacao_decil = simulacao_decil[,.(VAA = mean(VAA)), by = decil]
     
-    fig 
-  })
+    fig = plot_ly(simulacao_decil,
+                  x = ~decil,
+                  y = ~VAA,
+                  hovertemplate = "%{x}<br>VAA médio: %{y}<extra></extra>")
+    
+    fig = layout(fig, separators = ',.', xaxis = list(title = "Decis de renda"), yaxis = list(title = "VAA Médio", tickformat = ',.2f'), title = "VAA médio por Décil")
+    
+    fig
+    
+  }) 
+  
+  
+  
   
   ### Grafico dispersao
   output$graf_dispersao = renderPlotly({
@@ -151,7 +188,7 @@ shinyServer(function(input, output) {
       minimo_vaat = min(VAAT),
       maximo_vaat = max(VAAT),
       media_vaat = mean(VAAT)),
-      by = "UF"][,uf:= fct_reorder(UF, maximo_vaat)]
+      by = "UF"][,uf:= fct_reorder(UF, -media_vaat)]
     
     fig = plot_ly(dados, y = ~maximo_vaat, x = ~uf, name = "Máximo VAAT", type = 'scatter', meta = "VAAT Máximo da UF",
                    mode = "markers", marker = list(color = "blue"),
