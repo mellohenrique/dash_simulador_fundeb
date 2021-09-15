@@ -4,6 +4,7 @@ shinyUI(
   navbarPage(
     ### Define Tema
     theme = shinytheme("flatly"),
+    tags$head(tags$style(HTML('.info-box-text {text-transform: capitalize;} '))),
     selected = "Simulação",
     shinyWidgets::useShinydashboard(),
     ### Barra 1
@@ -16,14 +17,14 @@ shinyUI(
         h2("Complementação da União"),
         numericInput(
           "complementacao_vaaf",
-          "Montante da Complementação VAAF:",
-          value = 16000000000,
+          "Montante da Complementação VAAF (em milhões):",
+          value = 16000,
           min = 0,
         ),
         numericInput(
           "complementacao_vaat",
-          "Montante da Complementação VAAT:",
-          value = 3000000000,
+          "Montante da Complementação VAAT (em milhões):",
+          value = 3000,
           min = 0
         ),
         ### Parametros fiscais e sociais
@@ -33,17 +34,17 @@ shinyUI(
           "Parâmetros Social:",
           min = 1,
           max = 2,
-          value = c(1.3)
+          value = c(1)
         ),
         sliderInput(
           "fiscal",
           "Parâmetros Fiscal:",
           min = 1,
           max = 2,
-          value = c(1.3)
+          value = c(1)
         ),
         # Pesos por etapa e modalidade
-        h2("Fator por tipo e modalidade"),
+        h2("Fator por Tipo e Modalidade"),
         uiOutput("pesos")
       ),
       ## Tabela com resultados
@@ -93,17 +94,16 @@ shinyUI(
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
-          )
+          ),
         ),
         ### Gráfico com complementação de recursos por unidade da federação
         h1("Avaliação VAAT"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao")),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao_ente")),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_decil_saeb")),
+        HTML("<ul><li>O gráfico acima divide os entes federados em dez décis de acordo com o indicador socioeconômico como calculado pelo SAEB 2019;<li>O primeiro décil contém os entes com os 10% piores indicadores, o segundo décil os entes entre o 11% e 20% piores indicadores e assim sucessivamente</li></li</ul>"),
         h1("Avaliação da complementação"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_federal")),
-        h1("Avaliação do VAA"),
-        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_decil_saeb")),
-        HTML("<ul><li>O gráfico acima divide os entes federados em dez décis de acordo com o indicador socioeconômico como calculado pelo SAEB 2019;<li>O primeiro décil contém os entes com os 10% piores indicadores, o segundo décil os entes entre o 11% e 20% piores indicadores e assim sucessivamente</li></li><li>Considerou-se Valor Aluno Ano (VAA) não considerando as ponderações por aluno, por estas modificarem tanto o numerador como o denominador do cálculo em questão</li></ul>"),
         h1("Tabela com os resultados"),
         ### Tabela com resultados da simulação
         shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))

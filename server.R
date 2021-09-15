@@ -1,5 +1,3 @@
-# Carregando pacotes ----
-
 # Inicio do Server ----
 shinyServer(function(input, output) {
   ## Cria sliders com pesos para UI ----
@@ -60,15 +58,15 @@ shinyServer(function(input, output) {
     
     #### Simulacao ----
     simulacao = simulador.fundeb2::simula_fundeb(
-      dados_fnde = alunos,
+      dados_alunos = alunos,
       dados_complementar = complementar,
       peso_etapas = pesos_app(),
       chao_socio = 1,
       teto_socio = input$social,
       chao_fiscal = 1,
       teto_fiscal = input$fiscal,
-      complementacao_vaaf = complementacao_vaaf,
-      complementacao_vaat = complementacao_vaat,
+      complementacao_vaaf = complementacao_vaaf * 1000000,
+      complementacao_vaat = complementacao_vaat * 1000000,
       produto_dt = TRUE
     )
     
@@ -104,13 +102,13 @@ shinyServer(function(input, output) {
   output$box_mean_vaat_quintil = renderUI({
     prettyNum(mean(simulacao()[Ibge %in% codigos_ibge,]$VAAT), big.mark = ".", decimal.mark = ",")
   })
-  ### Calcula media VAAT do quintil SAEB para info box ----
+  
+  ### Calcula media VAAT da complementação municipal ----
   output$box_compl_municipal = renderUI({
     prettyNum(sum(simulacao()[Ibge > 100,]$`Montante VAAT`) - valor_fundo_total[estado == FALSE,]$total_fundo, big.mark = ".", decimal.mark = ",")
   })
   
-  ### Calcula media VAAT do quintil SAEB para info box ----
-  ### Calcula media VAAT do quintil SAEB para info box ----
+  ### Calcula media VAAT da complementação estadual ----
   output$box_compl_estadual = renderUI({
     prettyNum(sum(simulacao()[Ibge < 100,]$`Montante VAAT`) - valor_fundo_total[estado == TRUE,]$total_fundo, big.mark = ".", decimal.mark = ",")
   })
@@ -133,14 +131,14 @@ shinyServer(function(input, output) {
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = ""), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "Complementação da União por UF e Modalidade")
+    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "Complementação da União por UF e Modalidade")
     
     fig 
   })
   
   ## Gráfico da dispersão do VAAT por ente ----
   output$graf_dispersao_ente = plotly::renderPlotly({
-    ### Calculo do complementacao por unidade da federação ----
+    
     simulacao_ordenada = setorder(simulacao(), VAAT)
     simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
     
@@ -180,8 +178,6 @@ shinyServer(function(input, output) {
   }) 
   
   
-  
-  
   ### Grafico dispersao
   output$graf_dispersao = renderPlotly({
     dados = simulacao()[,.(
@@ -202,7 +198,7 @@ shinyServer(function(input, output) {
     
     layout(fig,
            title = "Dispersão do Valor VAAT por UF",
-           xaxis = list(title = ""),
+           xaxis = list(title = "", tickangle = 0),
            yaxis = list(title = "Valor em Reais", tickformat = ',.2f'),
            separators = ',.',
            hovermode = "x unified")

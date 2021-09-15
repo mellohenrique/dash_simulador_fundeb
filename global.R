@@ -7,6 +7,7 @@ library("shinyWidgets")
 library("shinydashboard")
 library("forcats")
 library("markdown")
+library("simulador.fundeb2")
 
 # Carrega dados
 load("data/peso.rda")
