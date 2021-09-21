@@ -3,12 +3,12 @@ shinyUI(
   ## Define UI como pagina de navegacao
   navbarPage(
     ### Define Tema
-    theme = shinytheme("flatly"),
-    tags$head(tags$style(HTML('.info-box-text {text-transform: capitalize;} '))),
+    ### Barra 1
+    title = div(img(src = 'logo.png', style = "margin-top: -20px; margin-left: -20px; padding-right:-0px;padding-bottom:10px", height = 70)),
+    includeCSS("estilo.css"),
     selected = "Simulação",
     shinyWidgets::useShinydashboard(),
-    ### Barra 1
-    title = "Simulador Fundeb",
+    theme = shinytheme("flatly"),
     tabPanel(
       title = "Simulação",
       sidebarPanel(

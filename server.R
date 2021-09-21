@@ -164,14 +164,14 @@ shinyServer(function(input, output) {
                          = TRUE)]
     
     
-    simulacao_decil = simulacao_decil[,.(VAA = mean(VAA)), by = decil]
+    simulacao_decil = simulacao_decil[,.(VAAT = mean(VAAT)), by = decil]
     
     fig = plot_ly(simulacao_decil,
                   x = ~decil,
-                  y = ~VAA,
-                  hovertemplate = "%{x}<br>VAA médio: %{y}<extra></extra>")
+                  y = ~VAAT,
+                  hovertemplate = "%{x}<br>VAAT médio: %{y}<extra></extra>")
     
-    fig = layout(fig, separators = ',.', xaxis = list(title = "Decis de renda"), yaxis = list(title = "VAA Médio", tickformat = ',.2f'), title = "VAA médio por Décil")
+    fig = layout(fig, separators = ',.', xaxis = list(title = "Decis de renda"), yaxis = list(title = "VAAT Médio", tickformat = ',.2f'), title = "VAAT médio por Décil")
     
     fig
     
