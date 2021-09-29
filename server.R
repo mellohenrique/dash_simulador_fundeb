@@ -73,10 +73,10 @@ shinyServer(function(input, output) {
     #### Altera nomes para padrao externo ----
     setnames(simulacao,
              names(simulacao),
-             c("UF", "Ibge", "Alunos", "Alunos ponderados etapa VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT", "VAAT", "VAA"))
+             c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT", "VAAT"))
 
     #### Altera ordem para padrao externo ----    
-    setcolorder(simulacao, c("UF", "Ibge", "Município", "VAAT", "Alunos", "Alunos ponderados etapa VAAF", "Alunos ponderados VAAT", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT", "VAA"))
+    setcolorder(simulacao, c("UF", "Ibge", "Alunos", "VAAT", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT"))
     
     #### Retorna resultado da simulacao----
     simulacao
@@ -85,32 +85,34 @@ shinyServer(function(input, output) {
   ## Valores para Infoboxes ----
   ### Calcula valor maximo do VAAT para info box
   output$box_max_vaat = renderUI({
-    prettyNum(max(simulacao()$VAAT), big.mark = ".", decimal.mark = ",")
+    prettyNum(max(simulacao()$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
   })
   
   ### Calcula minimo VAAT para info box ----
   output$box_media_vaat = renderUI({
-    prettyNum(mean(simulacao()$VAAT), big.mark = ".", decimal.mark = ",")
+    prettyNum(mean(simulacao()$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
   })
   
   ### Calcula minimo VAAT para info box ----
   output$box_min_vaat = renderUI({
-    prettyNum(min(simulacao()$VAAT), big.mark = ".", decimal.mark = ",")
+    prettyNum(min(simulacao()$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
   })
   
   ### Calcula media VAAT do quintil SAEB para info box ----
   output$box_mean_vaat_quintil = renderUI({
-    prettyNum(mean(simulacao()[Ibge %in% codigos_ibge,]$VAAT), big.mark = ".", decimal.mark = ",")
+    prettyNum(mean(simulacao()[Ibge %in% codigos_ibge,]$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
   })
   
-  ### Calcula media VAAT da complementação municipal ----
+  ### Calcula total VAAT da complementação municipal ----
   output$box_compl_municipal = renderUI({
-    prettyNum(sum(simulacao()[Ibge > 100,]$`Montante VAAT`) - valor_fundo_total[estado == FALSE,]$total_fundo, big.mark = ".", decimal.mark = ",")
+    prettyNum(sum(simulacao()[Ibge > 100,]$`Montante VAAT`) - sum(simulacao()[Ibge > 100,]$`Montante VAAF extra`) + 
+                sum(simulacao()[Ibge > 100,]$`Montante VAAF`) - sum(simulacao()[Ibge > 100,]$`Montante Base`), big.mark = ".", decimal.mark = ",", digits = 0)
   })
   
-  ### Calcula media VAAT da complementação estadual ----
+  ### Calcula total VAAT da complementação estadual ----
   output$box_compl_estadual = renderUI({
-    prettyNum(sum(simulacao()[Ibge < 100,]$`Montante VAAT`) - valor_fundo_total[estado == TRUE,]$total_fundo, big.mark = ".", decimal.mark = ",")
+    prettyNum(sum(simulacao()[Ibge < 100,]$`Montante VAAT`) - sum(simulacao()[Ibge < 100,]$`Montante VAAF extra`) +
+      sum(simulacao()[Ibge < 100,]$`Montante VAAF`) - sum(simulacao()[Ibge < 100,]$`Montante Base`), big.mark = ".", decimal.mark = ",", digits = 0, format = "f")
   })
   
   ## Gráfico com complementação da federação por UF ----
@@ -131,7 +133,7 @@ shinyServer(function(input, output) {
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "Complementação da União por UF e Modalidade")
+    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
     
     fig 
   })
@@ -149,7 +151,7 @@ shinyServer(function(input, output) {
                   hovertemplate = "Nome do ente: %{text}<br>VAAT: %{y}<extra></extra>",
                   type = "scatter")
     
-    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes"), yaxis = list(title = "VAAT", tickformat = ',.2f', range = list(0, 1.1*max(simulacao_ordenada$VAAT))), title = "VAAT por ente")
+    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes (ordenado, ascendente)"), yaxis = list(title = "VAAT", tickformat = ',.0f', range = list(0, 1.1*max(simulacao_ordenada$VAAT))), title = "<b>VAAT por Ente Federado  – 2021<b>")
     
     fig
   }) 
@@ -171,7 +173,7 @@ shinyServer(function(input, output) {
                   y = ~VAAT,
                   hovertemplate = "%{x}<br>VAAT médio: %{y}<extra></extra>")
     
-    fig = layout(fig, separators = ',.', xaxis = list(title = "Decis de renda"), yaxis = list(title = "VAAT Médio", tickformat = ',.2f'), title = "VAAT médio por Décil")
+    fig = layout(fig, separators = ',.', xaxis = list(title = "Decis de renda"), yaxis = list(title = "VAAT Médio (em reais)", tickformat = ',.0f'), title = "<b>VAAT Médio por Decil do indicador socioeconômico SAEB – 2019<b>")
     
     fig
     
@@ -188,7 +190,7 @@ shinyServer(function(input, output) {
     
     fig = plot_ly(dados, y = ~maximo_vaat, x = ~uf, name = "Máximo VAAT", type = 'scatter', meta = "VAAT Máximo da UF",
                    mode = "markers", marker = list(color = "blue"),
-                   hovertemplate = "%{meta}: %{y:,.2f}<extra></extra>")
+                   hovertemplate = "%{meta}: %{y:,.0f}<extra></extra>")
     
     fig = add_trace(fig, y = ~media_vaat, x = ~uf, name = "Média VAAT",type = 'scatter', meta = "VAAT Médio da UF",
                      mode = "markers", marker = list(color = "green"))
@@ -197,9 +199,9 @@ shinyServer(function(input, output) {
                      mode = "markers", marker = list(color = "orange"))
     
     layout(fig,
-           title = "Dispersão do Valor VAAT por UF",
+           title = "<b>Dispersão do Valor VAAT por UF<b>",
            xaxis = list(title = "", tickangle = 0),
-           yaxis = list(title = "Valor em Reais", tickformat = ',.2f'),
+           yaxis = list(title = "VAAT (em reais)", tickformat = ',.0f'),
            separators = ',.',
            hovermode = "x unified")
   })

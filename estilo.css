@@ -1,2 +1,13 @@
 
-.info-box-text {text-transform: capitalize;} 
+.info-box-text {text-transform: none;} 
+
+.page-footer{
+  background-color: #444444;
+  color: white
+  
+}
+
+ /* unvisited link */
+a:link {
+  color: blue;
+}
