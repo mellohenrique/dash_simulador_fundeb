@@ -159,7 +159,8 @@ shinyServer(function(input, output) {
   ### Gráfico decil ----
   output$graf_decil_saeb = plotly::renderPlotly({
     ### Calculo do complementacao por unidade da federação ----
-    simulacao_decil = simulacao()[complementar, indicador_social := fator_social, on = "Ibge"]
+    
+    simulacao_decil = simulacao()[complementar, indicador_social := fator_social, on = c("Ibge" = "ibge")]
     
     simulacao_decil[, decil := cut(indicador_social, quantile(indicador_social, probs = 0:10/10),
                          labels = c("1º Decil", "2º Decil", "3º Decil", "4º Decil", "5º Decil", "6º Decil", "7º Decil", "8º Decil", "9º Decil", "10º Decil"), include.lowest = TRUE, ordered_result	
