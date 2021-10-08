@@ -25,7 +25,7 @@ shinyServer(function(input, output) {
                          }))
   
   ### Altera os pesos vaat para considerar creche como 50% maior na etapa vaat
-  pesos$peso_vaat = pesos$peso_vaaf * c(1.5, 1.5, 1.5, 1.5, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5, 1.5, 1.5, 1.5, 1, 1, 1, 1, 1)
+  pesos$peso_vaat = pesos$peso_vaaf * c(1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
   
   ### Retorna pesos no ambiente reactive
   pesos
@@ -210,7 +210,7 @@ shinyServer(function(input, output) {
   ### Tabela DT ----
   output$simulacao_dt = DT::renderDT(
     simulacao(),
-    server = FALSE,
+    server = TRUE,
     filter = 'top',
     class = 'cell-border stripe',
     extensions = 'Buttons',
