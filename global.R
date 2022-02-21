@@ -13,7 +13,7 @@ options(scipen=999)
 
 # Carrega dados
 load("data/peso.rda")
-load("data/alunos.rda")
-load("data/complementar.rda")
-load("data/simulacao-inicial.rda")
+load("data/dash-alunos.rda")
+load("data/dash-complementar.rda")
+load("data/dash-simulacao-inicial.rda")
 load("data/codigos-ibge.rda")

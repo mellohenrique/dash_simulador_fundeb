@@ -73,10 +73,10 @@ shinyServer(function(input, output) {
     #### Altera nomes para padrao externo ----
     setnames(simulacao,
              names(simulacao),
-             c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT", "VAAT"))
+             c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb VAAF", "Montante do Fundeb VAAT", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAT Pré", "VAAF pré", "Montante VAAT", "Equalizado VAAT", "VAAT", "Total Recebido", "Total Recebido por Aluno Total"))
 
     #### Altera ordem para padrao externo ----    
-    setcolorder(simulacao, c("UF", "Ibge", "Alunos", "VAAT", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAF extra", "VAAF extra", "Montante VAAT", "Equalizado VAAT"))
+    setcolorder(simulacao, c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb VAAF", "Montante do Fundeb VAAT", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAT Pré", "VAAF pré", "Montante VAAT", "Equalizado VAAT", "VAAT", "Total Recebido", "Total Recebido por Aluno Total"))
     
     #### Retorna resultado da simulacao----
     simulacao
@@ -119,8 +119,8 @@ shinyServer(function(input, output) {
   output$graf_complementacao_federal = plotly::renderPlotly({
     ### Calculo do complementacao por unidade da federação ----
     complementacao_uf = melt(simulacao()[, .(
-      `Complementação VAAF` = sum(`Montante VAAF` - `Montante do Fundeb`),
-      `Complementação VAAT` = sum(`Montante VAAT` - `Montante VAAF extra`)
+      `Complementação VAAF` = sum(`Montante VAAF` - `Montante do Fundeb VAAF`),
+      `Complementação VAAT` = sum(`Montante VAAT` - `Montante VAAT Pré`)
     ), by = UF][,UF := fct_reorder(UF, - `Complementação VAAF` - `Complementação VAAT`)][, `:=`(`Complementação VAAF` = ifelse(`Complementação VAAF` < 1, 0 , `Complementação VAAF`), `Complementação VAAT` = ifelse(`Complementação VAAT` < 1, 0 , `Complementação VAAT`))], id.vars = "UF")
     
     fig = plot_ly(
@@ -138,6 +138,23 @@ shinyServer(function(input, output) {
     fig 
   })
   
+  ## Gráfico da dispersão do Valor por aluno Total  por ente ----
+  output$graf_dispersao_total_recebido = plotly::renderPlotly({
+    
+    simulacao_ordenada = setorder(simulacao(), `Total Recebido por Aluno Total`)
+    simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
+    
+    fig = plot_ly(simulacao_ordenada,
+                  x = ~ordem,
+                  y = ~`Total Recebido por Aluno Total`,
+                  text = ~Município,
+                  hovertemplate = "Nome do ente: %{text}<br>Total Recebido por Aluno Total: %{y}<extra></extra>",
+                  type = "scatter")
+    
+    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes (ordenado, ascendente)"), yaxis = list(title = "Total Recebido por Aluno Total", tickformat = ',.0f', range = list(0, 1.1*max(simulacao_ordenada$`Total Recebido por Aluno Total`))), title = "<b>Total Recebido (estimado) por Ente Federado  – 2022<b>")
+    
+    fig
+  }) 
   ## Gráfico da dispersão do VAAT por ente ----
   output$graf_dispersao_ente = plotly::renderPlotly({
     
@@ -165,7 +182,6 @@ shinyServer(function(input, output) {
     simulacao_decil[, decil := cut(indicador_social, quantile(indicador_social, probs = 0:10/10),
                          labels = c("1º Decil", "2º Decil", "3º Decil", "4º Decil", "5º Decil", "6º Decil", "7º Decil", "8º Decil", "9º Decil", "10º Decil"), include.lowest = TRUE, ordered_result	
                          = TRUE)]
-    
     
     simulacao_decil = simulacao_decil[,.(VAAT = mean(VAAT)), by = decil]
     
