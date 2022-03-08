@@ -65,6 +65,7 @@ shinyServer(function(input, output) {
       teto_socio = input$social,
       chao_fiscal = 1,
       teto_fiscal = input$fiscal,
+      entes_excluidos_vaat = entes_inabilitados,
       complementacao_vaaf = complementacao_vaaf * 1000000,
       complementacao_vaat = complementacao_vaat * 1000000,
       produto_dt = TRUE
@@ -73,10 +74,10 @@ shinyServer(function(input, output) {
     #### Altera nomes para padrao externo ----
     setnames(simulacao,
              names(simulacao),
-             c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb VAAF", "Montante do Fundeb VAAT", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAT Pré", "VAAF pré", "Montante VAAT", "Equalizado VAAT", "VAAT", "Total Recebido", "Total Recebido por Aluno Total"))
+             c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb VAAF", "Montante do Fundeb VAAT", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAT Pre", "VAAF Pre", "Montante VAAT", "Equalizado VAAT", "VAAT", "Total Recebido", "VAAT ano atual"))
 
     #### Altera ordem para padrao externo ----    
-    setcolorder(simulacao, c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb VAAF", "Montante do Fundeb VAAT", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAT Pré", "VAAF pré", "Montante VAAT", "Equalizado VAAT", "VAAT", "Total Recebido", "Total Recebido por Aluno Total"))
+    setcolorder(simulacao, c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb VAAF", "Montante do Fundeb VAAT", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAT Pre", "VAAF Pre", "Montante VAAT", "Equalizado VAAT", "VAAT", "Total Recebido", "VAAT ano atual"))
     
     #### Retorna resultado da simulacao----
     simulacao
@@ -95,7 +96,7 @@ shinyServer(function(input, output) {
   
   ### Calcula minimo VAAT para info box ----
   output$box_min_vaat = renderUI({
-    prettyNum(min(simulacao()$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
+    prettyNum(min(simulacao()[`Equalizado VAAT` == TRUE,]$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
   })
   
   ### Calcula media VAAT do quintil SAEB para info box ----
@@ -105,13 +106,13 @@ shinyServer(function(input, output) {
   
   ### Calcula total VAAT da complementação municipal ----
   output$box_compl_municipal = renderUI({
-    prettyNum(sum(simulacao()[Ibge > 100,]$`Montante VAAT`) - sum(simulacao()[Ibge > 100,]$`Montante VAAF extra`) + 
+    prettyNum(sum(simulacao()[Ibge > 100,]$`Montante VAAT`) - sum(simulacao()[Ibge > 100,]$`Montante VAAT Pre`) + 
                 sum(simulacao()[Ibge > 100,]$`Montante VAAF`) - sum(simulacao()[Ibge > 100,]$`Montante Base`), big.mark = ".", decimal.mark = ",", digits = 0)
   })
   
   ### Calcula total VAAT da complementação estadual ----
   output$box_compl_estadual = renderUI({
-    prettyNum(sum(simulacao()[Ibge < 100,]$`Montante VAAT`) - sum(simulacao()[Ibge < 100,]$`Montante VAAF extra`) +
+    prettyNum(sum(simulacao()[Ibge < 100,]$`Montante VAAT`) - sum(simulacao()[Ibge < 100,]$`Montante VAAT Pre`) +
       sum(simulacao()[Ibge < 100,]$`Montante VAAF`) - sum(simulacao()[Ibge < 100,]$`Montante Base`), big.mark = ".", decimal.mark = ",", digits = 0, format = "f")
   })
   
@@ -119,8 +120,8 @@ shinyServer(function(input, output) {
   output$graf_complementacao_federal = plotly::renderPlotly({
     ### Calculo do complementacao por unidade da federação ----
     complementacao_uf = melt(simulacao()[, .(
-      `Complementação VAAF` = sum(`Montante VAAF` - `Montante do Fundeb VAAF`),
-      `Complementação VAAT` = sum(`Montante VAAT` - `Montante VAAT Pré`)
+      `Complementação VAAF` = sum(`Montante VAAF` - `Montante Base`),
+      `Complementação VAAT` = sum(`Montante VAAT` - `Montante VAAT Pre`)
     ), by = UF][,UF := fct_reorder(UF, - `Complementação VAAF` - `Complementação VAAT`)][, `:=`(`Complementação VAAF` = ifelse(`Complementação VAAF` < 1, 0 , `Complementação VAAF`), `Complementação VAAT` = ifelse(`Complementação VAAT` < 1, 0 , `Complementação VAAT`))], id.vars = "UF")
     
     fig = plot_ly(
@@ -141,17 +142,20 @@ shinyServer(function(input, output) {
   ## Gráfico da dispersão do Valor por aluno Total  por ente ----
   output$graf_dispersao_total_recebido = plotly::renderPlotly({
     
-    simulacao_ordenada = setorder(simulacao(), `Total Recebido por Aluno Total`)
+    simulacao_ordenada = setorder(simulacao(), `VAAT ano atual`)
     simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
+    simulacao_ordenada = simulacao_ordenada[, `Habilitado VAAF` := ifelse(Ibge %in% entes_inabilitados, "Ente Inabilitado", "Ente Habilitado")]
     
     fig = plot_ly(simulacao_ordenada,
                   x = ~ordem,
-                  y = ~`Total Recebido por Aluno Total`,
+                  y = ~`VAAT ano atual`,
                   text = ~Município,
-                  hovertemplate = "Nome do ente: %{text}<br>Total Recebido por Aluno Total: %{y}<extra></extra>",
+                  color = ~`Habilitado VAAF`,
+                  colors = c("#414487FF", "#7AD151FF"),
+                  hovertemplate = "Nome do ente: %{text}<br>VAAT ano atual: %{y}<extra></extra>",
                   type = "scatter")
     
-    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes (ordenado, ascendente)"), yaxis = list(title = "Total Recebido por Aluno Total", tickformat = ',.0f', range = list(0, 1.1*max(simulacao_ordenada$`Total Recebido por Aluno Total`))), title = "<b>Total Recebido (estimado) por Ente Federado  – 2022<b>")
+    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes (ordenado, ascendente)"), yaxis = list(title = "VAAT ano atual", tickformat = ',.0f', range = list(0, 1.1*max(simulacao_ordenada$`VAAT ano atual`))), title = "<b>VAAT (estimado) por Ente Federado  – 2022<b>")
     
     fig
   }) 
@@ -160,15 +164,18 @@ shinyServer(function(input, output) {
     
     simulacao_ordenada = setorder(simulacao(), VAAT)
     simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
+    simulacao_ordenada = simulacao_ordenada[, `Habilitado VAAF` := ifelse(Ibge %in% entes_inabilitados, "Ente Inabilitado", "Ente Habilitado")]
     
     fig = plot_ly(simulacao_ordenada,
                   x = ~ordem,
                   y = ~VAAT,
                   text = ~Município,
+                  color = ~`Habilitado VAAF`,
+                  colors = c("#414487FF", "#7AD151FF"),
                   hovertemplate = "Nome do ente: %{text}<br>VAAT: %{y}<extra></extra>",
                   type = "scatter")
     
-    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes (ordenado, ascendente)"), yaxis = list(title = "VAAT", tickformat = ',.0f', range = list(0, 1.1*max(simulacao_ordenada$VAAT))), title = "<b>VAAT por Ente Federado  – 2021<b>")
+    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes (ordenado, ascendente)"), yaxis = list(title = "VAAT", tickformat = ',.0f', range = list(0, 1.1*max(simulacao_ordenada$VAAT))), title = "<b>VAAT por Ente Federado  – 2020 corrigido pela inflação<b>")
     
     fig
   }) 
@@ -226,7 +233,7 @@ shinyServer(function(input, output) {
   ### Tabela DT ----
   output$simulacao_dt = DT::renderDT(
     simulacao(),
-    server = TRUE,
+    server = FALSE,
     filter = 'top',
     class = 'cell-border stripe',
     extensions = 'Buttons',
@@ -239,7 +246,7 @@ shinyServer(function(input, output) {
       ordering = TRUE,
       scrollX = TRUE,
       dom = 'Bftsp',
-      buttons = c('copy', 'csv', 'excel')
+      buttons = c('csv', 'excel')
     )
   )
 })

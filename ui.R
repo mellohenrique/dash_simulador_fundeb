@@ -84,7 +84,7 @@ ui = tagList(
             fill = TRUE
           ),
             shinydashboard::infoBox(
-            "VAAT Mínimo",
+              HTML(paste("VAAT Mínimo", br(), "Ente habilitados")),
             uiOutput("box_min_vaat"),
             icon = icon("line-chart"),
             color = "yellow",
@@ -113,17 +113,24 @@ ui = tagList(
           ),
         ### Gráfico com complementação de recursos por unidade da federação
         br(),
-        h1("Síntese dos números do VAAT – ANO"),
+        h1("Síntese dos números do VAAT – 2022"),
+        HTML("<ul><li>Os gráficos abaixo apresentam a distribuição do VAAT segundo o cálculo do MEC e segundo a estimativa de recursos recebidos por aluno para 2022.</li></li</ul>"),
         br(),
-        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao")),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao_ente")),
+        HTML("O grafico acima apresenta a estimativa do VAAT de 2020 corrigido pela infalação com a complementação VAAT de 2022. Ou seja, apresenta o valor total a ser recebido pelo ente considerando: <ul><li>Receitas de 2020 corrigidas pela infalação;</li> <li>Complementação VAAF realizada em 2020 corrigida pela inflação;</li><li>Complementação VAAT com base nos valores de 2020 corrigidos pela inflação.</li>"),
         br(),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao_total_recebido")),
-        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao_ente")),
+        HTML("O grafico acima apresenta a estimativa do VAAT em 2022. Ou seja, apresenta o valor total a ser recebido pelo ente considerando: <ul><li>Estimativa de receitas de 2022;</li> <li>Complementação VAAF com base nos valores estimados de  2022;</li><li>Complementação VAAT com base nos valores de 2020 corrigidos pela inflação.</li>"),
+        br(),
+        br(),
+        h1("Síntese da Dispersão"),
+        br(),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao")),
         br(),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_decil_saeb")),
         HTML("<ul><li>O gráfico acima divide os entes federados em dez décis de acordo com o indicador socioeconômico como calculado pelo SAEB 2019;<li>O primeiro décil contém os entes com os 10% piores indicadores, o segundo décil os entes entre o 11% e 20% piores indicadores e assim sucessivamente</li></li</ul>"),
         br(),
-        h1("Síntese da Complementação da União – 2021"),
+        h1("Síntese da Complementação da União – 2022"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_federal")),
         br(),
         h1("Tabela com os resultados"),
@@ -145,7 +152,7 @@ ui = tagList(
                            <footer class='page-footer font-large indigo'>
                            <br>
                            <!-- Copyright -->
-                           <div class='footer-copyright text-center py-3'>© 2021 Copyright:
+                           <div class='footer-copyright text-center py-3'>© 2022 Copyright:
                            <a href='https://todospelaeducacao.org.br/'> Todos pela Educação</a>
                            </div>
                            <!-- Copyright -->
