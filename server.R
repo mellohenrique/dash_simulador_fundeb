@@ -2,30 +2,31 @@
 shinyServer(function(input, output) {
   ## Cria sliders com pesos para UI ----
   output$pesos = renderUI({
-    lapply(1:length(peso$etapa), function(i) {
+    lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
-        label = peso$etapa_nome[[i]],
+        label = pesos$etapa[[i]],
         inputId = paste0("etapa_", i),
         min = 0.8,
         max = 3.5,
-        value = c(peso$peso_vaaf[[i]])
+        value = c(pesos$peso_vaaf[[i]])
       )
     })
   })
   
-  ## Cria tabela de pesos usada no servidor ----
+  ## Cria tabela de peso usada no servidor ----
   pesos_app = reactive({
     req(input$etapa_30)
     
   pesos = data.frame(
-      etapa = peso$etapa,
-      peso_vaaf = sapply(1:length(peso$etapa),
+      etapa = pesos$etapa,
+      peso_vaaf = sapply(1:length(pesos$etapa),
+                         function(i) {
+                           input[[paste0("etapa_", i)]][[1]]
+                         }),
+      peso_vaat = sapply(1:length(pesos$etapa),
                          function(i) {
                            input[[paste0("etapa_", i)]][[1]]
                          }))
-  
-  ### Altera os pesos vaat para considerar creche como 50% maior na etapa vaat
-  pesos$peso_vaat = pesos$peso_vaaf * c(1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
   
   ### Retorna pesos no ambiente reactive
   pesos
@@ -57,28 +58,15 @@ shinyServer(function(input, output) {
     }
     
     #### Simulacao ----
-    simulacao = simulador.fundeb2::simula_fundeb(
+    simulacao = simulador.fundeb::simula_fundeb(
       dados_alunos = alunos,
-      dados_complementar = complementar,
-      peso_etapas = pesos_app(),
-      chao_socio = 1,
-      teto_socio = input$social,
-      chao_fiscal = 1,
-      teto_fiscal = input$fiscal,
-      entes_excluidos_vaat = entes_inabilitados,
+      dados_complementar = complementos,
+      dados_peso = pesos_app(),
       complementacao_vaaf = complementacao_vaaf * 1000000,
       complementacao_vaat = complementacao_vaat * 1000000,
-      produto_dt = TRUE
+      complementacao_vaar = 0
     )
-    
-    #### Altera nomes para padrao externo ----
-    setnames(simulacao,
-             names(simulacao),
-             c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb VAAF", "Montante do Fundeb VAAT", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAT Pre", "VAAF Pre", "Montante VAAT", "Equalizado VAAT", "VAAT", "Total Recebido", "VAAT ano atual"))
 
-    #### Altera ordem para padrao externo ----    
-    setcolorder(simulacao, c("UF", "Ibge", "Alunos", "Alunos ponderados VAAF", "Alunos ponderados VAAT", "Município", "Fator Social", "Fator Fiscal", "Montante do Fundeb VAAF", "Montante do Fundeb VAAT", "Montante Extra", "Fundo estadual etapa VAAF", "Equalizado VAAF", "VAAF", "Montante VAAF", "Montante Base", "Montante VAAT Pre", "VAAF Pre", "Montante VAAT", "Equalizado VAAT", "VAAT", "Total Recebido", "VAAT ano atual"))
-    
     #### Retorna resultado da simulacao----
     simulacao
     })
@@ -86,34 +74,27 @@ shinyServer(function(input, output) {
   ## Valores para Infoboxes ----
   ### Calcula valor maximo do VAAT para info box
   output$box_max_vaat = renderUI({
-    prettyNum(max(simulacao()$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
+    prettyNum(max(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
   ### Calcula minimo VAAT para info box ----
   output$box_media_vaat = renderUI({
-    prettyNum(mean(simulacao()$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
+    prettyNum(mean(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
   ### Calcula minimo VAAT para info box ----
   output$box_min_vaat = renderUI({
-    prettyNum(min(simulacao()[`Equalizado VAAT` == TRUE,]$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
-  })
-  
-  ### Calcula media VAAT do quintil SAEB para info box ----
-  output$box_mean_vaat_quintil = renderUI({
-    prettyNum(mean(simulacao()[Ibge %in% codigos_ibge,]$VAAT), big.mark = ".", decimal.mark = ",", digits = 0)
+    prettyNum(min(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
   ### Calcula total VAAT da complementação municipal ----
   output$box_compl_municipal = renderUI({
-    prettyNum(sum(simulacao()[Ibge > 100,]$`Montante VAAT`) - sum(simulacao()[Ibge > 100,]$`Montante VAAT Pre`) + 
-                sum(simulacao()[Ibge > 100,]$`Montante VAAF`) - sum(simulacao()[Ibge > 100,]$`Montante Base`), big.mark = ".", decimal.mark = ",", digits = 0)
+    prettyNum(sum(simulacao()[simulacao()$ibge > 100,]$complemento_vaat), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
   ### Calcula total VAAT da complementação estadual ----
   output$box_compl_estadual = renderUI({
-    prettyNum(sum(simulacao()[Ibge < 100,]$`Montante VAAT`) - sum(simulacao()[Ibge < 100,]$`Montante VAAT Pre`) +
-      sum(simulacao()[Ibge < 100,]$`Montante VAAF`) - sum(simulacao()[Ibge < 100,]$`Montante Base`), big.mark = ".", decimal.mark = ",", digits = 0, format = "f")
+    prettyNum(sum(simulacao()[simulacao()$ibge < 100,]$complemento_vaat), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
   ## Gráfico com complementação da federação por UF ----
@@ -144,7 +125,7 @@ shinyServer(function(input, output) {
     
     simulacao_ordenada = setorder(simulacao(), `VAAT ano atual`)
     simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
-    simulacao_ordenada = simulacao_ordenada[, `Habilitado VAAF` := ifelse(Ibge %in% entes_inabilitados, "Ente Inabilitado", "Ente Habilitado")]
+    simulacao_ordenada = simulacao_ordenada[, `Habilitado VAAF` := ifelse(ibge %in% entes_inabilitados, "Ente Inabilitado", "Ente Habilitado")]
     
     fig = plot_ly(simulacao_ordenada,
                   x = ~ordem,
@@ -164,7 +145,7 @@ shinyServer(function(input, output) {
     
     simulacao_ordenada = setorder(simulacao(), VAAT)
     simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
-    simulacao_ordenada = simulacao_ordenada[, `Habilitado VAAF` := ifelse(Ibge %in% entes_inabilitados, "Ente Inabilitado", "Ente Habilitado")]
+    simulacao_ordenada = simulacao_ordenada[, `Habilitado VAAF` := ifelse(ibge %in% entes_inabilitados, "Ente Inabilitado", "Ente Habilitado")]
     
     fig = plot_ly(simulacao_ordenada,
                   x = ~ordem,
@@ -184,7 +165,7 @@ shinyServer(function(input, output) {
   output$graf_decil_saeb = plotly::renderPlotly({
     ### Calculo do complementacao por unidade da federação ----
     
-    simulacao_decil = simulacao()[complementar, indicador_social := fator_social, on = c("Ibge" = "ibge")]
+    simulacao_decil = simulacao()[complementar, indicador_social := fator_social, on = c("ibge" = "ibge")]
     
     simulacao_decil[, decil := cut(indicador_social, quantile(indicador_social, probs = 0:10/10),
                          labels = c("1º Decil", "2º Decil", "3º Decil", "4º Decil", "5º Decil", "6º Decil", "7º Decil", "8º Decil", "9º Decil", "10º Decil"), include.lowest = TRUE, ordered_result	
