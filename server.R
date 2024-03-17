@@ -77,9 +77,9 @@ shinyServer(function(input, output) {
     prettyNum(max(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-  ### Calcula minimo VAAT para info box ----
-  output$box_media_vaat = renderUI({
-    prettyNum(mean(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
+  ### Calcula minimo VAAF para info box ----
+  output$box_min_vaaf = renderUI({
+    prettyNum(min(simulacao()$vaaf_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
   ### Calcula minimo VAAT para info box ----
@@ -89,29 +89,39 @@ shinyServer(function(input, output) {
   
   ### Calcula total VAAT da complementação municipal ----
   output$box_compl_municipal = renderUI({
-    prettyNum(sum(simulacao()[simulacao()$ibge > 100,]$complemento_vaat), big.mark = ".", decimal.mark = ",", digits = 4)
+    prettyNum(sum(simulacao()[simulacao()$ibge > 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
   ### Calcula total VAAT da complementação estadual ----
   output$box_compl_estadual = renderUI({
-    prettyNum(sum(simulacao()[simulacao()$ibge < 100,]$complemento_vaat), big.mark = ".", decimal.mark = ",", digits = 4)
+    prettyNum(sum(simulacao()[simulacao()$ibge < 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
   ## Gráfico com complementação da federação por UF ----
   output$graf_complementacao_federal = plotly::renderPlotly({
     ### Calculo do complementacao por unidade da federação ----
-    complementacao_uf = melt(simulacao()[, .(
-      `Complementação VAAF` = sum(`Montante VAAF` - `Montante Base`),
-      `Complementação VAAT` = sum(`Montante VAAT` - `Montante VAAT Pre`)
-    ), by = UF][,UF := fct_reorder(UF, - `Complementação VAAF` - `Complementação VAAT`)][, `:=`(`Complementação VAAF` = ifelse(`Complementação VAAF` < 1, 0 , `Complementação VAAF`), `Complementação VAAT` = ifelse(`Complementação VAAT` < 1, 0 , `Complementação VAAT`))], id.vars = "UF")
+    simulacao = simulacao()
+    
+    complementacao_uf = stats::aggregate(
+      list(complemento_vaaf = simulacao$complemento_vaaf,
+           complemento_vaat = simulacao$complemento_vaat),
+           by = list(uf = simulacao$uf),
+      FUN=sum)
+    
+    complementacao_uf = complementacao_uf[order((complementacao_uf$complemento_vaaf + complementacao_uf$complemento_vaat) * -1),]
+    complementacao_uf$uf = factor(complementacao_uf$uf, levels = complementacao_uf$uf, ordered = TRUE)
+    
+    complementacao_uf = reshape(complementacao_uf, direction = "long", varying = 2:3, times = names(complementacao_uf)[2:3], timevar = "tipo", v.names = "complemento")
+    
+    complementacao_uf = complementacao_uf[,c('uf', 'tipo', 'complemento')]
     
     fig = plot_ly(
       complementacao_uf,
-      x = ~UF,
-      y = ~value/1000000,
-      name = ~variable,
+      x = ~uf,
+      y = ~complemento/1000000,
+      name = ~tipo,
       type = "bar",
-      meta = ~variable,
+      meta = ~tipo,
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
     )
     

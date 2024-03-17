@@ -77,22 +77,15 @@ ui = tagList(
             fill = TRUE
           ),
           shinydashboard::infoBox(
-            "VAAT Médio",
-            uiOutput("box_media_vaat"),
+            "VAAT Mínimo",
+            uiOutput("box_min_vaat"),
             icon = icon("line-chart"),
             color = "purple",
             fill = TRUE
           ),
-            shinydashboard::infoBox(
-              HTML(paste("VAAT Mínimo", br(), "Ente habilitados")),
-            uiOutput("box_min_vaat"),
-            icon = icon("line-chart"),
-            color = "yellow",
-            fill = TRUE
-          ),
           shinydashboard::infoBox(
-            HTML(paste("VAAT Médio", br(), "Quintil inferior")),
-            uiOutput("box_mean_vaat_quintil"),
+            HTML(paste("VAAF Mínimo", br(), "Quintil inferior")),
+            uiOutput("box_min_vaaf"),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
@@ -110,7 +103,8 @@ ui = tagList(
             icon = icon("line-chart"),
             color = "aqua",
             fill = TRUE
-          ),
+          )),
+        column(8,
         ### Gráfico com complementação de recursos por unidade da federação
         br(),
         h1("Síntese dos números do VAAT – 2022"),
