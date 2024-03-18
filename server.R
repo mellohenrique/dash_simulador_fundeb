@@ -1,11 +1,11 @@
 # Inicio do Server ----
 shinyServer(function(input, output) {
   ## Cria sliders com pesos para UI ----
-  output$pesos = renderUI({
+  output$pesos_vaaf = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
         label = pesos$etapa[[i]],
-        inputId = paste0("etapa_", i),
+        inputId = paste0("pesos_vaaf_", i),
         min = 0.8,
         max = 3.5,
         value = c(pesos$peso_vaaf[[i]])
@@ -13,6 +13,17 @@ shinyServer(function(input, output) {
     })
   })
   
+  output$pesos_vaat = renderUI({
+    lapply(1:length(pesos$etapa), function(i) {
+      sliderInput(
+        label = pesos$etapa[[i]],
+        inputId = paste0("pesos_vaat_", i),
+        min = 0.8,
+        max = 3.5,
+        value = c(pesos$peso_vaaf[[i]])
+      )
+    })
+  })
   ## Cria tabela de peso usada no servidor ----
   pesos_app = reactive({
     req(input$etapa_30)
@@ -21,11 +32,11 @@ shinyServer(function(input, output) {
       etapa = pesos$etapa,
       peso_vaaf = sapply(1:length(pesos$etapa),
                          function(i) {
-                           input[[paste0("etapa_", i)]][[1]]
+                           input[[paste0("pesos_vaaf_", i)]][[1]]
                          }),
       peso_vaat = sapply(1:length(pesos$etapa),
                          function(i) {
-                           input[[paste0("etapa_", i)]][[1]]
+                           input[[paste0("pesos_vaat_", i)]][[1]]
                          }))
   
   ### Retorna pesos no ambiente reactive
@@ -129,70 +140,6 @@ shinyServer(function(input, output) {
     
     fig 
   })
-  
-  ## Gráfico da dispersão do Valor por aluno Total  por ente ----
-  output$graf_dispersao_total_recebido = plotly::renderPlotly({
-    
-    simulacao_ordenada = setorder(simulacao(), `VAAT ano atual`)
-    simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
-    simulacao_ordenada = simulacao_ordenada[, `Habilitado VAAF` := ifelse(ibge %in% entes_inabilitados, "Ente Inabilitado", "Ente Habilitado")]
-    
-    fig = plot_ly(simulacao_ordenada,
-                  x = ~ordem,
-                  y = ~`VAAT ano atual`,
-                  text = ~Município,
-                  color = ~`Habilitado VAAF`,
-                  colors = c("#414487FF", "#7AD151FF"),
-                  hovertemplate = "Nome do ente: %{text}<br>VAAT ano atual: %{y}<extra></extra>",
-                  type = "scatter")
-    
-    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes (ordenado, ascendente)"), yaxis = list(title = "VAAT ano atual", tickformat = ',.0f', range = list(0, 1.1*max(simulacao_ordenada$`VAAT ano atual`))), title = "<b>VAAT (estimado) por Ente Federado  – 2022<b>")
-    
-    fig
-  }) 
-  ## Gráfico da dispersão do VAAT por ente ----
-  output$graf_dispersao_ente = plotly::renderPlotly({
-    
-    simulacao_ordenada = setorder(simulacao(), VAAT)
-    simulacao_ordenada = simulacao_ordenada[, ordem := 1:5595]
-    simulacao_ordenada = simulacao_ordenada[, `Habilitado VAAF` := ifelse(ibge %in% entes_inabilitados, "Ente Inabilitado", "Ente Habilitado")]
-    
-    fig = plot_ly(simulacao_ordenada,
-                  x = ~ordem,
-                  y = ~VAAT,
-                  text = ~Município,
-                  color = ~`Habilitado VAAF`,
-                  colors = c("#414487FF", "#7AD151FF"),
-                  hovertemplate = "Nome do ente: %{text}<br>VAAT: %{y}<extra></extra>",
-                  type = "scatter")
-    
-    fig = layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "Número de entes (ordenado, ascendente)"), yaxis = list(title = "VAAT", tickformat = ',.0f', range = list(0, 1.1*max(simulacao_ordenada$VAAT))), title = "<b>VAAT por Ente Federado  – 2020 corrigido pela inflação<b>")
-    
-    fig
-  }) 
-  
-  ### Gráfico decil ----
-  output$graf_decil_saeb = plotly::renderPlotly({
-    ### Calculo do complementacao por unidade da federação ----
-    
-    simulacao_decil = simulacao()[complementar, indicador_social := fator_social, on = c("ibge" = "ibge")]
-    
-    simulacao_decil[, decil := cut(indicador_social, quantile(indicador_social, probs = 0:10/10),
-                         labels = c("1º Decil", "2º Decil", "3º Decil", "4º Decil", "5º Decil", "6º Decil", "7º Decil", "8º Decil", "9º Decil", "10º Decil"), include.lowest = TRUE, ordered_result	
-                         = TRUE)]
-    
-    simulacao_decil = simulacao_decil[,.(VAAT = mean(VAAT)), by = decil]
-    
-    fig = plot_ly(simulacao_decil,
-                  x = ~decil,
-                  y = ~VAAT,
-                  hovertemplate = "%{x}<br>VAAT médio: %{y}<extra></extra>")
-    
-    fig = layout(fig, separators = ',.', xaxis = list(title = "Decis de renda"), yaxis = list(title = "VAAT Médio (em reais)", tickformat = ',.0f'), title = "<b>VAAT Médio por Decil do indicador socioeconômico SAEB – 2019<b>")
-    
-    fig
-    
-  }) 
   
   
   ### Grafico dispersao
