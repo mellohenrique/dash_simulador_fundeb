@@ -2,10 +2,8 @@
 
 O aplicativo Simulador Fundeb é um aplicativo utilizado para estimar o funcionamento do Fundo de Manutenção da Educação Básica e de Valorização dos Profissionais de Educação  de acordo com diferentes parâmetros a serem definidos pelo usuário. A ferramenta utiliza dados do Fundo Nacional de Desenvolvimento da Educação (FNDE) para calcular o montante distribuído para cada ente nacional e a complementação da União. Dois projetos são utilizados para a criação deste aplicativo:
 
-* O próprio aplicativo em _Shiny_ cujo código pode ser obtido no link do [simulador_fundeb](https://github.com/mellohenrique/dash-simulador-fundeb);
-* O pacote em R criado para fazer as simulações [simulador.fundeb2](https://github.com/mellohenrique/simulador.fundeb2).
-
-O cenário-base considerado, com complementação de 10% do valor do fundo na etapa VAAF e 5% na etapa VAAT, pode ser consultado no [google drive](https://docs.google.com/spreadsheets/d/1OIEJfyPBbazDx_I8IUesaytO-g-oAcfLEx6v-vUWqWM/edit?usp=sharing).
+* O próprio aplicativo em _Shiny_ cujo código pode ser obtido no link do [simulador_fundeb](https://github.com/mellohenrique/dash_simulador_fundeb);
+* O pacote em R criado para fazer as simulações [simulador.fundeb2](https://github.com/mellohenrique/simulador.fundeb).
 
 # Fonte
 
