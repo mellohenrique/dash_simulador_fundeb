@@ -196,29 +196,32 @@ shinyServer(function(input, output) {
   
   
   ### Grafico dispersao
-  output$graf_dispersao = renderPlotly({
-    dados = simulacao()[,.(
-      minimo_vaat = min(VAAT),
-      maximo_vaat = max(VAAT),
-      media_vaat = mean(VAAT)),
-      by = "UF"][,uf:= fct_reorder(UF, -media_vaat)]
+  output$graf_diff_uf = renderPlotly({
+    simulacao_atual = simulacao()
     
-    fig = plot_ly(dados, y = ~maximo_vaat, x = ~uf, name = "Máximo VAAT", type = 'scatter', meta = "VAAT Máximo da UF",
-                   mode = "markers", marker = list(color = "blue"),
-                   hovertemplate = "%{meta}: %{y:,.0f}<extra></extra>")
-    
-    fig = add_trace(fig, y = ~media_vaat, x = ~uf, name = "Média VAAT",type = 'scatter', meta = "VAAT Médio da UF",
-                     mode = "markers", marker = list(color = "green"))
-    
-    fig = add_trace(fig, y = ~minimo_vaat, x = ~uf, name = "Mínimo VAAT",type = 'scatter', meta = "VAAT Mínimo da UF",
-                     mode = "markers", marker = list(color = "orange"))
-    
-    layout(fig,
-           title = "<b>Dispersão do Valor VAAT por UF<b>",
-           xaxis = list(title = "", tickangle = 0),
-           yaxis = list(title = "VAAT (em reais)", tickformat = ',.0f'),
-           separators = ',.',
-           hovermode = "x unified")
+    complementacao_atual = stats::aggregate(
+      list(complemento_atual = simulacao_atual$complemento_uniao),
+           by = list(uf = simulacao_atual$uf),
+           FUN=sum)
+      
+      comparacao = merge(complementacao_atual, simulacao_inicial_agregada, by = 'uf')
+      
+      comparacao$diff = comparacao$complemento_atual - comparacao$complemento_uniao
+      
+      comparacao = comparacao[order(comparacao$diff * -1),]
+      comparacao$uf = factor(comparacao$uf, levels = comparacao$uf, ordered = TRUE)
+      
+      fig = plot_ly(
+        comparacao,
+        x = ~uf,
+        y = ~diff/1000000,
+        type = "bar",
+        hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
+      )
+      
+      fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = '<b>Diferença Complementação da União por UF<b> - Cenário atual x Cenário base')
+      
+      fig 
   })
   
   ### Tabela DT ----
