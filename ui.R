@@ -2,7 +2,6 @@
 ui = tagList(
   includeCSS("estilo.css"),
   tags$head(HTML("<title>Simulador Fundeb</title>")),
-  shinyWidgets::useShinydashboard(),
   ## Define UI como pagina de navegacao
   navbarPage(
     theme = shinytheme("flatly"),
@@ -59,45 +58,40 @@ ui = tagList(
           min = 1,
           max = 2,
           value = c(1)
-        )),
-        # Pesos por etapa e modalidade
-        wellPanel(
-        h2("Fator por Tipo e Modalidade"),
-        uiOutput("pesos")
-      )),
+        ))),
       ## Tabela com resultados
       column(8,
         h1("Informações Básicas"),
         ### Linha com os infoboxes
-          shinydashboard::infoBox(
+          bslib::value_box(
             "VAAT Máximo",
             uiOutput("box_max_vaat"),
             icon = icon("line-chart"),
             color = "orange",
             fill = TRUE
           ),
-          shinydashboard::infoBox(
+          bslib::value_box(
             "VAAT Mínimo",
             uiOutput("box_min_vaat"),
             icon = icon("line-chart"),
             color = "purple",
             fill = TRUE
           ),
-          shinydashboard::infoBox(
+          bslib::value_box(
             HTML(paste("VAAF Mínimo", br(), "Quintil inferior")),
             uiOutput("box_min_vaaf"),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
           ),
-          shinydashboard::infoBox(
+          bslib::value_box(
             HTML(paste("Complementação da", br(), "União aos Municípios")),
             uiOutput("box_compl_municipal"),
             icon = icon("line-chart"),
             color = "blue",
             fill = TRUE
           ),
-          shinydashboard::infoBox(
+          bslib::value_box(
             HTML(paste("Complementação da", br(), "ao Estados")),
             uiOutput("box_compl_estadual"),
             icon = icon("line-chart"),
@@ -105,17 +99,6 @@ ui = tagList(
             fill = TRUE
           )),
         column(8,
-        ### Gráfico com complementação de recursos por unidade da federação
-        br(),
-        h1("Síntese dos números do VAAT – 2022"),
-        HTML("<ul><li>Os gráficos abaixo apresentam a distribuição do VAAT segundo o cálculo do MEC e segundo a estimativa de recursos recebidos por aluno para 2022.</li></li</ul>"),
-        br(),
-        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao_ente")),
-        HTML("O grafico acima apresenta a estimativa do VAAT de 2020 corrigido pela infalação com a complementação VAAT de 2022. Ou seja, apresenta o valor total a ser recebido pelo ente considerando: <ul><li>Receitas de 2020 corrigidas pela infalação;</li> <li>Complementação VAAF realizada em 2020 corrigida pela inflação;</li><li>Complementação VAAT com base nos valores de 2020 corrigidos pela inflação.</li>"),
-        br(),
-        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_dispersao_total_recebido")),
-        HTML("O grafico acima apresenta a estimativa do VAAT em 2022. Ou seja, apresenta o valor total a ser recebido pelo ente considerando: <ul><li>Estimativa de receitas de 2022;</li> <li>Complementação VAAF com base nos valores estimados de  2022;</li><li>Complementação VAAT com base nos valores de 2020 corrigidos pela inflação.</li>"),
-        br(),
         br(),
         h1("Síntese da Diferença por UF"),
         br(),
@@ -132,12 +115,25 @@ ui = tagList(
       ))
       
     ),
+    tabPanel('Pesos',
+             column(6,
+                    # Pesos por etapa e modalidade
+                    wellPanel(
+                      h2("Fator por Tipo e Modalidade"),
+                      uiOutput("pesos_vaaf")
+                    )),
+             column(6,
+                    # Pesos por etapa e modalidade
+                    wellPanel(
+                      h2("Fator por Tipo e Modalidade"),
+                      uiOutput("pesos_vaat")
+                    ))),
     tabPanel("Documentação",
              column(2),
              column(8,
                     withMathJax(
                       shiny::includeMarkdown("documentacao.md")
-                    )))
+                    ))),
   ),
   tags$footer(HTML("
                     <!-- Footer -->
