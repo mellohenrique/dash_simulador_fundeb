@@ -1,6 +1,7 @@
 # Define a Interface de Usuario
 ui = tagList(
   includeCSS("estilo.css"),
+  shinyWidgets::useShinydashboard(),
   tags$head(HTML("<title>Simulador Fundeb</title>")),
   ## Define UI como pagina de navegacao
   navbarPage(
@@ -12,93 +13,86 @@ ui = tagList(
     tabPanel(
       title = "Simulação",
       fluidRow(
-        column(12,
-        ### Complementacao da União
-        h2("Complementação da União")),
-        column(5,
-               shinyWidgets::autonumericInput(width = "100%",
-          "complementacao_vaaf",
-          "Montante da Complementação VAAF (em milhões):",
-          value = 20529,
-          align = "left",
-          decimalCharacter = ",",
-          digitGroupSeparator = ".",
-          decimalPlaces = 0,
-          min = 0,
-        )),
-        column(5,
-               shinyWidgets::autonumericInput(width = "100%",
-          "complementacao_vaat",
-          "Montante da Complementação VAAT (em milhões):",
-          value = 10264,
-          align = "left",
-          decimalCharacter = ",",
-          digitGroupSeparator = ".",
-          decimalPlaces = 0,
-          min = 0
-        )),
-        column(2, 
-        actionButton("botao", "Simular", width = "100%",
-                     style='font-size:200%'))),
-        fluidRow(
-        ### Parametros fiscais e sociais
         column(4,
-               wellPanel(
+        ### Complementacao da União
+        h2("Complementação da União"),
+          shinyWidgets::autonumericInput(
+            width = "100%",
+            "complementacao_vaaf",
+            "Montante da Complementação VAAF (em milhões):",
+            value = 20529,
+            align = "left",
+            decimalCharacter = ",",
+            digitGroupSeparator = ".",
+            decimalPlaces = 0,
+            min = 0),
+          shinyWidgets::autonumericInput(
+            width = "100%",
+            "complementacao_vaat",
+            "Montante da Complementação VAAT (em milhões):",
+            value = 10264,
+            align = "left",
+            decimalCharacter = ",",
+            digitGroupSeparator = ".",
+            decimalPlaces = 0,
+            min = 0),
+      wellPanel(
         h2("Fator por parâmetro social e fiscal"),
-        sliderInput(
-          "social",
-          "Parâmetros Social:",
-          min = 1,
-          max = 2,
-          value = c(1)
-        ),
-        sliderInput(
-          "fiscal",
-          "Parâmetros Fiscal:",
-          min = 1,
-          max = 2,
-          value = c(1)
-        ))),
-      ## Tabela com resultados
+                 sliderInput(
+                   "social",
+                   "Parâmetros Social:",
+                   min = 1,
+                   max = 2,
+                   value = c(1)
+                 ),
+                 sliderInput(
+                   "fiscal",
+                   "Parâmetros Fiscal:",
+                   min = 1,
+                   max = 2,
+                   value = c(1)
+                 )),
+    actionButton("botao", "Simular", width = "100%",
+                     style='font-size:200%')),
       column(8,
         h1("Informações Básicas"),
         ### Linha com os infoboxes
-          bslib::value_box(
+          fluidRow(infoBox(
             "VAAT Máximo",
             uiOutput("box_max_vaat"),
             icon = icon("line-chart"),
             color = "orange",
             fill = TRUE
           ),
-          bslib::value_box(
+          infoBox(
             "VAAT Mínimo",
             uiOutput("box_min_vaat"),
             icon = icon("line-chart"),
             color = "purple",
             fill = TRUE
           ),
-          bslib::value_box(
+          infoBox(
             HTML(paste("VAAF Mínimo", br(), "Quintil inferior")),
             uiOutput("box_min_vaaf"),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
-          ),
-          bslib::value_box(
+          )),
+        fluidRow(
+          infoBox(
             HTML(paste("Complementação da", br(), "União aos Municípios")),
             uiOutput("box_compl_municipal"),
             icon = icon("line-chart"),
             color = "blue",
             fill = TRUE
           ),
-          bslib::value_box(
+          infoBox(
             HTML(paste("Complementação da", br(), "ao Estados")),
             uiOutput("box_compl_estadual"),
             icon = icon("line-chart"),
             color = "aqua",
             fill = TRUE
           )),
-        column(8,
         br(),
         h1("Síntese da Diferença por UF"),
         br(),
@@ -108,13 +102,13 @@ ui = tagList(
         h1("Síntese da Complementação da União – 2022"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_federal")),
         br(),
+        h1("Mapa Complemento"),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("mapa_complemento")),
+        br(),
         h1("Tabela com os resultados"),
         ### Tabela com resultados da simulação
         shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))
-        
-      ))
-      
-    ),
+      ))),
     tabPanel('Pesos',
              column(6,
                     # Pesos por etapa e modalidade
@@ -133,8 +127,7 @@ ui = tagList(
              column(8,
                     withMathJax(
                       shiny::includeMarkdown("documentacao.md")
-                    ))),
-  ),
+                    )))),
   tags$footer(HTML("
                     <!-- Footer -->
                            <footer class='page-footer font-large indigo'>
