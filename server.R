@@ -182,7 +182,7 @@ shinyServer(function(input, output) {
       by = list(uf = simulacao_atual$uf),
       FUN=sum)
     
-    mapa_estadual = merge(mapa_uf, complementacao_atual)
+    mapa_estadual = merge(mapa, complementacao_atual)
     
     mapa_estadual
   })
@@ -192,7 +192,7 @@ shinyServer(function(input, output) {
   output$mapa_complemento = renderPlotly({
     mapa_fundeb = mapa_fundeb()
     
-    fig = ggplot(mapa_fundeb[,c('complemento_atual', 'geometry')], aes(fill = complemento_atual)) +
+    fig = ggplot(mapa_fundeb[,c('complemento_atual', 'geometry')], aes(fill = complemento_atual, geometry = geometry)) +
       geom_sf() +
       scale_fill_viridis_c()
 
@@ -220,4 +220,9 @@ shinyServer(function(input, output) {
       buttons = c('csv', 'excel')
     )
   )
+  
+  
+  
+  outputOptions(output, "pesos_vaat", suspendWhenHidden = FALSE)
+  outputOptions(output, "pesos_vaaf", suspendWhenHidden = FALSE)
 })
