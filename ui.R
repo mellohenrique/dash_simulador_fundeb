@@ -122,11 +122,17 @@ ui = tagList(
                       h2("Fator por Tipo e Modalidade"),
                       uiOutput("pesos_vaat")
                     ))),
-    tabPanel("Documentação",
+    tabPanel("Documentação", 
              column(2),
              column(8,
                     withMathJax(
                       shiny::includeMarkdown("documentacao.md")
+                    ))),
+    tabPanel("Tabela - Simulação",
+             column(2),
+             column(8,
+                    withMathJax(
+                      shiny::includeMarkdown("documentacao_tabela_gerada.md")
                     )))),
   tags$footer(HTML("
                     <!-- Footer -->
