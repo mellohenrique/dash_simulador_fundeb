@@ -2,7 +2,7 @@
 ui = tagList(
   includeCSS("estilo.css"),
   shinyWidgets::useShinydashboard(),
-  tags$head(HTML("<title>Simulador Fundeb</title>")),
+  tags$head(HTML("<title>Simulador Fundeb (Em desenvolvimento)</title>")),
   ## Define UI como pagina de navegacao
   navbarPage(
     theme = shinytheme("flatly"),
@@ -20,7 +20,7 @@ ui = tagList(
             width = "100%",
             "complementacao_vaaf",
             "Montante da Complementação VAAF (em milhões):",
-            value = 20529,
+            value = 22905.22,
             align = "left",
             decimalCharacter = ",",
             digitGroupSeparator = ".",
@@ -30,24 +30,34 @@ ui = tagList(
             width = "100%",
             "complementacao_vaat",
             "Montante da Complementação VAAT (em milhões):",
-            value = 10264,
+            value = 14315.76,
             align = "left",
             decimalCharacter = ",",
             digitGroupSeparator = ".",
             decimalPlaces = 0,
             min = 0),
+        shinyWidgets::autonumericInput(
+          width = "100%",
+          "complementacao_vaar",
+          "Montante da Complementação VAAR (em milhões):",
+          value = 1718,
+          align = "left",
+          decimalCharacter = ",",
+          digitGroupSeparator = ".",
+          decimalPlaces = 0,
+          min = 0),
       wellPanel(
         h2("Fator por parâmetro social e fiscal"),
                  sliderInput(
                    "social",
-                   "Parâmetros Social:",
+                   "Parâmetros Social (nome temporário):",
                    min = 1,
                    max = 2,
                    value = c(1)
                  ),
                  sliderInput(
                    "fiscal",
-                   "Parâmetros Fiscal:",
+                   "Parâmetros Fiscal (nome temporário):",
                    min = 1,
                    max = 2,
                    value = c(1)
@@ -97,9 +107,8 @@ ui = tagList(
         h1("Síntese da Diferença por UF"),
         br(),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_diff_uf")),
-        HTML("<ul><li>O gráfico acima divide os entes federados em dez décis de acordo com o indicador socioeconômico como calculado pelo SAEB 2019;<li>O primeiro décil contém os entes com os 10% piores indicadores, o segundo décil os entes entre o 11% e 20% piores indicadores e assim sucessivamente</li></li</ul>"),
         br(),
-        h1("Síntese da Complementação da União – 2022"),
+        h1("Síntese da Complementação da União – 2023"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_federal")),
         br(),
         h1("Mapa Complemento"),
@@ -139,7 +148,7 @@ ui = tagList(
                            <footer class='page-footer font-large indigo'>
                            <br>
                            <!-- Copyright -->
-                           <div class='footer-copyright text-center py-3'>© 2022 Copyright:
+                           <div class='footer-copyright text-center py-3'>© 2024 Copyright:
                            <a href='https://todospelaeducacao.org.br/'> Todos pela Educação</a>
                            </div>
                            <!-- Copyright -->
