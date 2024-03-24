@@ -5,15 +5,15 @@ O aplicativo Simulador Fundeb é um aplicativo utilizado para estimar o funciona
 * O próprio aplicativo em _Shiny_ cujo código pode ser obtido no link do [dash_simulador_fundeb](https://github.com/mellohenrique/dash_simulador_fundeb);
 * O pacote em R criado para fazer as simulações [simulador.fundeb](https://github.com/mellohenrique/simulador.fundeb).
 
-# Fonte
+## Fonte
 
-* Os dados de alunos foram retirados da [portaria interministerial número 7, de 24/12/2021](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/matriculas-da-educacao-basica/2022-com-base-na-portaria-interministerial-no-11-de-24-12-2021);
-* Os valores de receitas do Fundeb  foram retirados do portal do [FNDE](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/novo-fundeb/consultas-novo-fundeb-2022);
-* Os pesos utilizados foram obtidos da Lei Nº 14.113, de 25 de dezembro de 2020, disponível no seguinte [link](https://www.in.gov.br/en/web/dou/-/lei-n-14.113-de-25-de-dezembro-de-2020-296390151), e na documentação do FNDE, no seguinte [PDF](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/vaat/vaat-2021-fatores-de-ponderacao.pdf).
-* Indicador de Nível Socioeconômico (nse), disponível no site do [Instituto Nacional de Estudos e Pesquisas Educacionais Anísio Teixeira](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/nivel-socioeconomico);
-* O indicador fiscal foi construído utilizando a receita bruta per capita por ente federado, disponível no site do Tesouro Nacional pelo [Sistema de Informações Contábeis e Fiscais do Setor Público Brasileiro](https://siconfi.tesouro.gov.br/siconfi/index.jsf).
+* Os dados de alunos foram retirados da [portaria interministerial número 7, de 29/12/2023](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/matriculas-da-educacao-basica/2023-com-base-na-portaria-interministerial-no-7-de-29-12-2023);
+* Os valores de receitas do Fundeb  foram retirados do portal do [FNDE](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/2023);
+* Os pesos utilizados foram obtidos no portal do Fundeb [link](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/vaat/Fatoresdeponderao.pdf), e na documentação do FNDE, no seguinte [PDF](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/notas-tecnicas/NotaTcnicaConjuntan122022.pdf).
+* Indicador de Nível Socioeconômico (nse), disponível no site do [Instituto Nacional de Estudos e Pesquisas Educacionais Anísio Teixeira (INEP)](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/nivel-socioeconomico);
+* O indicador fiscal será fornecido pelo INEP.
 
-# Equalização
+## Equalização
 
 A equalização dos fundos é realizada em duas etapas subsequentes:
 
@@ -21,14 +21,22 @@ A equalização dos fundos é realizada em duas etapas subsequentes:
 2. Etapa VAAT, em que são equalizados os fundos dos entes por valor aluno/ano;
 3. Etapa VAAR, em que são distribuídos recursos para as redes que atingirem metas educacionais.
 
+### Etapa VAAF
+
 A etapa VAAF equaliza os fundos da seguinte maneira: considera-se o fundo estadual com menor aluno/ano e complementam-se os recursos deste até que tenha o mesmo valor aluno/ano do segundo fundo estadual com menor aluno/ano. Em seguida complementam-se estes dois fundos até terem o mesmo valor aluno/ano que o terceiro fundo com menor aluno/ano. Esta operação é repetida até os recursos disponíveis para a complementação terem acabado. Na última etapa, caso não seja possível igualar os fundos com menor aluno/ano até o valor do próximo fundo, complementam-se todos os fundos até que tenham o maior valor aluno ano possível com os recursos disponíveis.
+
+### Etapa VAAT
 
 A etapa VAAT equaliza os fundos dos entes das federações, não os fundos estaduais, fazendo a complementação pelo Valor Aluno Ano Total, que dá mais peso aos alunos da educação infantial e considera outros recursos além do Fundeb. Na complementação VAAT, complementa-se o ente da federação com menor valor até este ter o mesmo valor aluno/ano do segundo ente com menor aluno/ano. Em sequência, complementam-se os recursos destes dois entes que tenham o mesmo valor aluno/ano que o terceiro fundo com menor aluno/ano. Esta operação é contínua, até o fim dos recursos disponíveis para a complementação. Ao fim, caso não seja possível igualar os fundos com menor aluno/ano até o valor do próximo fundo, complementam-se todos os fundos até que tenham o maior valor aluno/ano possível com os recursos disponíveis.
 
-## Dados usados nas etapas
+### Etapa VAAR
 
-* A complementação da Etapa VAAF utiliza os recursos estimados para o ano de 2022;
-* A complementação da Etapa VAAT utiliza os recursos realizados do ano de 2020;
+A complementação VAAR destina-se a entes que tenham melhorado indicadores de aprendizado e antedimento, de acordo com o Inep. O objetivo dessa etapa é beneficiar os entes mais eficientes e promover melhorias na educação brasileira.
+
+## Dados usados nas etapas VAAF e VAAT
+
+* A complementação da Etapa VAAF utiliza os recursos estimados para o ano de 2023;
+* A complementação da Etapa VAAT utiliza os recursos realizados do ano de 2021.
 
 ## Formulação matemática da equalização
 
