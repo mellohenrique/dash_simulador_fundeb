@@ -4,7 +4,7 @@ shinyServer(function(input, output) {
   output$pesos_vaaf = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
-        label = pesos$etapa[[i]],
+        label = pesos$nome_etapa[[i]],
         inputId = paste0("pesos_vaaf_", i),
         min = 0.8,
         max = 3.5,
@@ -16,7 +16,7 @@ shinyServer(function(input, output) {
   output$pesos_vaat = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
-        label = pesos$etapa[[i]],
+        label = pesos$nome_etapa[[i]],
         inputId = paste0("pesos_vaat_", i),
         min = 0.8,
         max = 3.5,
@@ -68,6 +68,12 @@ shinyServer(function(input, output) {
     } else {
       input$complementacao_vaat
     }
+    ### Considera valor zero caso nao NA ou NULL no valor de complementacao vaat ---- 
+    complementacao_vaar = if (is.null(input$complementacao_vaar) | is.na(input$complementacao_vaar)) {
+      0
+    } else {
+      input$complementacao_vaar
+    }
     
     #### Simulacao ----
     simulacao = simulador.fundeb::simula_fundeb(
@@ -76,7 +82,7 @@ shinyServer(function(input, output) {
       dados_peso = pesos_app(),
       complementacao_vaaf = complementacao_vaaf * 1000000,
       complementacao_vaat = complementacao_vaat * 1000000,
-      complementacao_vaar = 0
+      complementacao_vaar = complementacao_vaar
     )
 
     #### Retorna resultado da simulacao----
@@ -126,6 +132,7 @@ shinyServer(function(input, output) {
     complementacao_uf = reshape(complementacao_uf, direction = "long", varying = 2:3, times = names(complementacao_uf)[2:3], timevar = "tipo", v.names = "complemento")
     
     complementacao_uf = complementacao_uf[,c('uf', 'tipo', 'complemento')]
+    complementacao_uf$tipo = ifelse(complementacao_uf$tipo == 'complemento_vaaf', "Complementação VAAF", 'Complementação VAAT')
     
     fig = plot_ly(
       complementacao_uf,
@@ -194,7 +201,8 @@ shinyServer(function(input, output) {
     
     fig = ggplot(mapa_fundeb[,c('complemento_atual', 'geometry')], aes(fill = complemento_atual, geometry = geometry)) +
       geom_sf() +
-      scale_fill_viridis_c()
+      scale_fill_viridis_c() +
+      theme_bw()
 
     fig = ggplotly(fig)
     
