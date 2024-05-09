@@ -36,16 +36,6 @@ ui = tagList(
             digitGroupSeparator = ".",
             decimalPlaces = 0,
             min = 0),
-        shinyWidgets::autonumericInput(
-          width = "100%",
-          "complementacao_vaar",
-          "Montante da Complementação VAAR (em milhões):",
-          value = 1718,
-          align = "left",
-          decimalCharacter = ",",
-          digitGroupSeparator = ".",
-          decimalPlaces = 0,
-          min = 0),
       wellPanel(
         h2("Fator por parâmetro social e fiscal"),
                  sliderInput(

@@ -68,12 +68,6 @@ shinyServer(function(input, output) {
     } else {
       input$complementacao_vaat
     }
-    ### Considera valor zero caso nao NA ou NULL no valor de complementacao vaat ---- 
-    complementacao_vaar = if (is.null(input$complementacao_vaar) | is.na(input$complementacao_vaar)) {
-      0
-    } else {
-      input$complementacao_vaar
-    }
     
     #### Simulacao ----
     simulacao = simulador.fundeb::simula_fundeb(
@@ -82,7 +76,7 @@ shinyServer(function(input, output) {
       dados_peso = pesos_app(),
       complementacao_vaaf = complementacao_vaaf * 1000000,
       complementacao_vaat = complementacao_vaat * 1000000,
-      complementacao_vaar = complementacao_vaar
+      complementacao_vaar = 0
     )
 
     #### Retorna resultado da simulacao----
