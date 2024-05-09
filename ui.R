@@ -111,9 +111,6 @@ ui = tagList(
         h1("Síntese da Complementação da União – 2023"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_federal")),
         br(),
-        h1("Mapa Complemento"),
-        shinycssloaders::withSpinner(plotly::plotlyOutput("mapa_complemento")),
-        br(),
         h1("Tabela com os resultados"),
         ### Tabela com resultados da simulação
         shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))

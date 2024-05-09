@@ -179,36 +179,7 @@ shinyServer(function(input, output) {
       fig 
   })
   
-  ## Cria tabela de peso usada no servidor ----
-  mapa_fundeb = reactive({
-    
-    simulacao_atual = simulacao()
-    
-    complementacao_atual = stats::aggregate(
-      list(complemento_atual = simulacao_atual$complemento_uniao),
-      by = list(uf = simulacao_atual$uf),
-      FUN=sum)
-    
-    mapa_estadual = merge(mapa, complementacao_atual)
-    
-    mapa_estadual
-  })
-  
-  
-  ### Mapa Complemento ----
-  output$mapa_complemento = renderPlotly({
-    mapa_fundeb = mapa_fundeb()
-    
-    fig = ggplot(mapa_fundeb[,c('complemento_atual', 'geometry')], aes(fill = complemento_atual, geometry = geometry)) +
-      geom_sf() +
-      scale_fill_viridis_c() +
-      theme_bw()
 
-    fig = ggplotly(fig)
-    
-    fig 
-  })
-  
   ## Tabela DT ----
   output$simulacao_dt = DT::renderDT(
     simulacao(),
