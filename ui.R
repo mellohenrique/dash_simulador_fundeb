@@ -37,17 +37,17 @@ ui = tagList(
             decimalPlaces = 0,
             min = 0),
       wellPanel(
-        h2("Fator por parâmetro social e fiscal"),
+        h2("Fatores de ponderação"),
                  sliderInput(
                    "social",
-                   "Parâmetros Social (nome temporário):",
+                   "Fator do nível socioeconômico:",
                    min = 1,
                    max = 2,
                    value = c(1)
                  ),
                  sliderInput(
                    "fiscal",
-                   "Parâmetros Fiscal (nome temporário):",
+                   "Fator da disponibilidade de recursos vinculados:",
                    min = 1,
                    max = 2,
                    value = c(1)
@@ -99,7 +99,10 @@ ui = tagList(
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_diff_uf")),
         br(),
         h1("Síntese da Complementação da União – 2023"),
-        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_federal")),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_modalidade")),
+        br(),
+        h1("Síntese da Complementação da União – 2023"),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_destino")),
         br(),
         h1("Tabela com os resultados"),
         ### Tabela com resultados da simulação

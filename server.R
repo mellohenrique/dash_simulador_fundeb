@@ -1,6 +1,7 @@
 # Inicio do Server ----
 shinyServer(function(input, output) {
-  ## Cria sliders com pesos para UI ----
+  ## Cria sliders para UI ----
+  ### VAAF ----
   output$pesos_vaaf = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
@@ -13,6 +14,7 @@ shinyServer(function(input, output) {
     })
   })
   
+  ### VAAT ----
   output$pesos_vaat = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
@@ -27,8 +29,11 @@ shinyServer(function(input, output) {
   
   ## Cria tabela de peso usada no servidor ----
   pesos_app = reactive({
+    
+  ### Estabelece reatividade ----
     req(input$pesos_vaat_30)
     
+  ### Cria data.frame com os pesos ----
   pesos = data.frame(
       etapa = pesos$etapa,
       peso_vaaf = sapply(1:length(pesos$etapa),
@@ -40,36 +45,36 @@ shinyServer(function(input, output) {
                            input[[paste0("pesos_vaat_", i)]][[1]]
                          }))
   
-  ### Retorna pesos no ambiente reactive
+  ### Retorna pesos no ambiente reactive----
   pesos
     
   })
   
-  ## Simula fundeb com parametros dados pelo usuario ----
-  ### Considera simulacao ja realizada para primeira simulacao ----
+## Simula fundeb com parametros dados pelo usuario ----
+### Considera simulacao ja realizada para primeira simulacao ----
   simulacao = reactive({
     if (input$botao == 0) {
       simulacao_inicial
     } else { 
       simulacao_realizada()}})
   
-  ### Realiza-se simulacao quando botao ativado
+### Realiza-se simulacao quando botao ativado  ----
   simulacao_realizada = eventReactive(input$botao, {
     
-    #### Considera valor zero caso nao NA ou NULL no valor de complementacao vaaf ----
+### Considera valor zero caso nao NA ou NULL no valor de complementacao vaaf ----
     complementacao_vaaf = if (is.null(input$complementacao_vaaf) | is.na(input$complementacao_vaaf)) {
       0
     } else {
       input$complementacao_vaaf
     }
-    #### Considera valor zero caso nao NA ou NULL no valor de complementacao vaat ---- 
+### Considera valor zero caso nao NA ou NULL no valor de complementacao vaat ---- 
     complementacao_vaat = if (is.null(input$complementacao_vaat) | is.na(input$complementacao_vaat)) {
       0
     } else {
       input$complementacao_vaat
     }
     
-    #### Simulacao ----
+## Simulacao ----
     simulacao = simulador.fundeb::simula_fundeb(
       dados_alunos = alunos,
       dados_complementar = complementos,
@@ -79,17 +84,17 @@ shinyServer(function(input, output) {
       complementacao_vaar = 0
     )
 
-    #### Retorna resultado da simulacao----
+### Retorna resultado da simulacao----
     simulacao
     })
   
-  ## Valores para Infoboxes ----
-  ### Calcula valor maximo do VAAT para info box
+## Valores para Infoboxes ----
+### Calcula valor maximo do VAAT para info box ----
   output$box_max_vaat = renderUI({
     prettyNum(max(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-  ### Calcula minimo VAAF para info box ----
+### Calcula minimo VAAF para info box ----
   output$box_min_vaaf = renderUI({
     prettyNum(min(simulacao()$vaaf_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
@@ -99,19 +104,19 @@ shinyServer(function(input, output) {
     prettyNum(min(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-  ### Calcula total VAAT da complementação municipal ----
+### Calcula total VAAT da complementação municipal ----
   output$box_compl_municipal = renderUI({
     prettyNum(sum(simulacao()[simulacao()$ibge > 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-  ### Calcula total VAAT da complementação estadual ----
+### Calcula total VAAT da complementação estadual ----
   output$box_compl_estadual = renderUI({
     prettyNum(sum(simulacao()[simulacao()$ibge < 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-  ## Gráfico com complementação da federação por UF ----
-  output$graf_complementacao_federal = plotly::renderPlotly({
-    ### Calculo do complementacao por unidade da federação ----
+## Gráfico com complementação da união por UF e tipo de complementação ----
+  output$graf_complementacao_modalidade = plotly::renderPlotly({
+### Calculo do complementacao por unidade da federação ----
     simulacao = simulacao()
     
     complementacao_uf = stats::aggregate(
@@ -127,7 +132,7 @@ shinyServer(function(input, output) {
     
     complementacao_uf = complementacao_uf[,c('uf', 'tipo', 'complemento')]
     complementacao_uf$tipo = ifelse(complementacao_uf$tipo == 'complemento_vaaf', "Complementação VAAF", 'Complementação VAAT')
-    
+### Plotly ----    
     fig = plot_ly(
       complementacao_uf,
       x = ~uf,
@@ -139,42 +144,76 @@ shinyServer(function(input, output) {
     )
     
     fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
-    
+### Retorna figura  
     fig 
   })
   
+  ## Gráfico com complementação da união por UF e destino da complementação ----
+  output$graf_complementacao_destino = plotly::renderPlotly({
+    ### Calculo do complementacao por unidade da federação ----
+    simulacao = simulacao()
+    
+    complementacao_uf = stats::aggregate(
+      list(complemento = simulacao$complemento_vaaf + simulacao$complemento_vaat),
+      by = list(uf = simulacao$uf,
+                tipo = ifelse(simulacao$ibge < 100, 'Estado', 'Município')),
+      FUN=sum)
+    
+    complementacao_ordem = stats::aggregate(
+      list(complemento = -complementacao_uf$complemento),
+      by = list(uf = complementacao_uf$uf),
+      FUN=sum)
+    
+    complementacao_uf$uf = factor(complementacao_uf$uf, levels = complementacao_ordem[order(complementacao_ordem$complemento),]$uf, ordered = TRUE)
+    
+    ### Plotly ----    
+    fig = plot_ly(
+      complementacao_uf,
+      x = ~uf,
+      y = ~complemento/1000000,
+      name = ~tipo,
+      meta = ~tipo,
+      type = "bar",
+      hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
+    )
+    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
+    ### Retorna figura  
+    fig 
+  })
   
-  ### Grafico dispersao
+## Grafico diferença ----
   output$graf_diff_uf = renderPlotly({
     simulacao_atual = simulacao()
     
     complementacao_atual = stats::aggregate(
       list(complemento_atual = simulacao_atual$complemento_uniao),
-           by = list(uf = simulacao_atual$uf),
-           FUN=sum)
-      
-      comparacao = merge(complementacao_atual, simulacao_inicial_agregada, by = 'uf')
-      
-      comparacao$diff = comparacao$complemento_atual - comparacao$complemento_uniao
-      
-      comparacao = comparacao[order(comparacao$diff * -1),]
-      comparacao$uf = factor(comparacao$uf, levels = comparacao$uf, ordered = TRUE)
-      
-      fig = plot_ly(
-        comparacao,
-        x = ~uf,
-        y = ~diff/1000000,
-        type = "bar",
-        hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
-      )
-      
-      fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = '<b>Diferença Complementação da União por UF<b> - Cenário atual x Cenário base')
-      
-      fig 
+      by = list(uf = simulacao_atual$uf),
+      FUN=sum)
+    
+    comparacao = merge(complementacao_atual, simulacao_inicial_agregada, by = 'uf')
+    
+    comparacao$diff = comparacao$complemento_atual - comparacao$complemento_uniao
+    
+    comparacao = comparacao[order(comparacao$diff * -1),]
+    comparacao$uf = factor(comparacao$uf, levels = comparacao$uf, ordered = TRUE)
+    
+    fig = plot_ly(
+      comparacao,
+      x = ~uf,
+      y = ~diff/1000000,
+      type = "bar",
+      hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
+    )
+    
+    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = '<b>Diferença Complementação da União por UF<b> - Cenário atual x Cenário base')
+    
+    fig 
+    
+    
   })
   
 
-  ## Tabela DT ----
+## Tabela DT ----
   output$simulacao_dt = DT::renderDT(
     simulacao(),
     server = FALSE,
