@@ -54,7 +54,7 @@ shinyServer(function(input, output) {
 ### Considera simulacao ja realizada para primeira simulacao ----
   simulacao = reactive({
     if (input$botao == 0) {
-      simulacao_inicial
+      simulacao_base
     } else { 
       simulacao_realizada()}})
   
@@ -76,11 +76,11 @@ shinyServer(function(input, output) {
     
 ## Simulacao ----
     simulacao = simulador.fundeb::simula_fundeb(
-      dados_alunos = alunos,
-      dados_complementar = complementos,
+      dados_alunos = matriculas,
+      dados_complementar = complementar,
       dados_peso = pesos_app(),
-      complementacao_vaaf = complementacao_vaaf * 1000000,
-      complementacao_vaat = complementacao_vaat * 1000000,
+      complementacao_vaaf = 24153287047,
+      complementacao_vaat = 18114965285,
       complementacao_vaar = 0
     )
 
@@ -190,9 +190,9 @@ shinyServer(function(input, output) {
       by = list(uf = simulacao_atual$uf),
       FUN=sum)
     
-    comparacao = merge(complementacao_atual, simulacao_inicial_agregada, by = 'uf')
+    comparacao = merge(complementacao_atual, simulacao_base_agregada, by = 'uf')
     
-    comparacao$diff = comparacao$complemento_atual - comparacao$complemento_uniao
+    comparacao$diff = comparacao$complemento_atual - comparacao$complemento_base
     
     comparacao = comparacao[order(comparacao$diff * -1),]
     comparacao$uf = factor(comparacao$uf, levels = comparacao$uf, ordered = TRUE)
