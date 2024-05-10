@@ -1,21 +1,23 @@
 # Aplicativo Simulador Fundeb
 
-O aplicativo Simulador Fundeb é um aplicativo utilizado para estimar o funcionamento do Fundo de Manutenção da Educação Básica e de Valorização dos Profissionais de Educação  de acordo com diferentes parâmetros a serem definidos pelo usuário. A ferramenta utiliza dados do Fundo Nacional de Desenvolvimento da Educação (FNDE) para calcular o montante distribuído para cada ente nacional e a complementação da União. Dois projetos são utilizados para a criação deste aplicativo:
+O aplicativo Simulador Fundeb é um aplicativo utilizado para estimar o funcionamento do Fundo de Manutenção da Educação Básica e de Valorização dos Profissionais de Educação (Fundeb) de acordo com diferentes parâmetros a serem definidos pelo usuário. A ferramenta utiliza dados do Fundo Nacional de Desenvolvimento da Educação (FNDE) para calcular o montante distribuído para cada ente nacional e a complementação da União. Dois projetos são utilizados para a criação deste aplicativo:
 
 * O próprio aplicativo em _Shiny_ cujo código pode ser obtido no link do [dash_simulador_fundeb](https://github.com/mellohenrique/dash_simulador_fundeb);
 * O pacote em R criado para fazer as simulações [simulador.fundeb](https://github.com/mellohenrique/simulador.fundeb).
 
+Simula-se apenas as etapas VAAF e VAAT, não faz parte do escopo deste projeto se avaliar a etapa VAAR.
+
 ## Fonte
 
-* Os dados de alunos foram retirados da [portaria interministerial número 7, de 29/12/2023](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/matriculas-da-educacao-basica/2023-com-base-na-portaria-interministerial-no-7-de-29-12-2023);
-* Os valores de receitas do Fundeb  foram retirados do portal do [FNDE](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/2023);
-* Os pesos utilizados foram obtidos no portal do Fundeb [link](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/vaat/Fatoresdeponderao.pdf), e na documentação do FNDE, no seguinte [PDF](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/notas-tecnicas/NotaTcnicaConjuntan122022.pdf).
+* Os dados de alunos foram retirados da [portaria interministerial número 1, de 23/02/2024](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/matriculas-da-educacao-basica/copy_of_2024-com-base-na-portaria-interministerial-no-6-de-28-12-2023);
+* Os valores de receitas do Fundeb  foram retirados do portal do [FNDE](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/2024-1);
+* Os pesos utilizados foram obtidos no portal do Fundeb [link](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Fwww.gov.br%2Ffnde%2Fpt-br%2Facesso-a-informacao%2Facoes-e-programas%2Ffinanciamento%2Ffundeb%2Fnotas-tecnicas%2FAnexoNTn42023RegrasdefiltragemFundeb2024.xlsx&wdOrigin=BROWSELINK);
 * Indicador de Nível Socioeconômico (nse), disponível no site do [Instituto Nacional de Estudos e Pesquisas Educacionais Anísio Teixeira (INEP)](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/indicadores-educacionais/nivel-socioeconomico);
-* O indicador fiscal será fornecido pelo INEP.
+* O fator da disponibilidade de recursos vinculados está presente para ser utilizado em futuras implementações.
 
 ## Equalização
 
-A equalização dos fundos é realizada em duas etapas subsequentes:
+A equalização dos fundos é realizada em três etapas subsequentes:
 
 1. Etapa VAAF, em que são equalizados os fundos estaduais por valor aluno/ano;
 2. Etapa VAAT, em que são equalizados os fundos dos entes por valor aluno/ano;
