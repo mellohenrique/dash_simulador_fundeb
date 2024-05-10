@@ -5,7 +5,7 @@ shinyServer(function(input, output) {
   output$pesos_vaaf = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
-        label = pesos$nome_etapa[[i]],
+        label = pesos$nome[[i]],
         inputId = paste0("pesos_vaaf_", i),
         min = 0.8,
         max = 3.5,
@@ -18,7 +18,7 @@ shinyServer(function(input, output) {
   output$pesos_vaat = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
-        label = pesos$nome_etapa[[i]],
+        label = pesos$nome[[i]],
         inputId = paste0("pesos_vaat_", i),
         min = 0.8,
         max = 3.5,
