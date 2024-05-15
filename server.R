@@ -131,7 +131,7 @@ shinyServer(function(input, output) {
     complementacao_uf = reshape(complementacao_uf, direction = "long", varying = 2:3, times = names(complementacao_uf)[2:3], timevar = "tipo", v.names = "complemento")
     
     complementacao_uf = complementacao_uf[,c('uf', 'tipo', 'complemento')]
-    complementacao_uf$tipo = ifelse(complementacao_uf$tipo == 'complemento_vaaf', "Complementação VAAF", 'Complementação VAAT')
+    complementacao_uf$tipo = ifelse(complementacao_uf$tipo == 'complemento_vaaf', "Complementação-VAAF", 'Complementação-VAAT')
 ### Plotly ----    
     fig = plot_ly(
       complementacao_uf,
@@ -143,7 +143,7 @@ shinyServer(function(input, output) {
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
+    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Categoria Administrativa<b>")
 ### Retorna figura  
     fig 
   })
@@ -202,7 +202,7 @@ shinyServer(function(input, output) {
       x = ~uf,
       y = ~diff/1000000,
       type = "bar",
-      hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
+      hovertemplate = "UF: %{label}<br>Diferença: %{y:,.0f} milhões<extra></extra>"
     )
     
     fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = '<b>Diferença Complementação da União por UF<b> - Cenário atual x Cenário base')

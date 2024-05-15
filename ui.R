@@ -19,7 +19,7 @@ ui = tagList(
           shinyWidgets::autonumericInput(
             width = "100%",
             "complementacao_vaaf",
-            "Montante da Complementação VAAF:",
+            "Montante da Complementação-VAAF:",
             value = 24153287047,
             align = "left",
             decimalCharacter = ",",
@@ -29,7 +29,7 @@ ui = tagList(
           shinyWidgets::autonumericInput(
             width = "100%",
             "complementacao_vaat",
-            "Montante da Complementação VAAT:",
+            "Montante da Complementação-VAAT:",
             value = 18114965285,
             align = "left",
             decimalCharacter = ",",
@@ -87,7 +87,7 @@ ui = tagList(
             fill = TRUE
           ),
           infoBox(
-            HTML(paste("Complementação da", br(), "ao Estados")),
+            HTML(paste("Complementação da", br(), "União aos Estados")),
             uiOutput("box_compl_estadual"),
             icon = icon("line-chart"),
             color = "aqua",
@@ -104,8 +104,8 @@ ui = tagList(
         h1("Síntese da Complementação da União – 2024"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_destino")),
         br(),
-        h1("Tabela com os resultados"),
-        ### Tabela com resultados da simulação
+        ### Planilha com resultados da simulação ----
+        h1("Planilha com os resultados"),
         shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))
       ))),
     tabPanel('Pesos',
