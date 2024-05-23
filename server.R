@@ -1,5 +1,6 @@
 # Inicio do Server ----
 shinyServer(function(input, output) {
+  source('analise_diferenca_simulacoes.R')
   ## Cria sliders para UI ----
   ### VAAF ----
   output$pesos_vaaf = renderUI({
@@ -114,6 +115,11 @@ shinyServer(function(input, output) {
     prettyNum(sum(simulacao()[simulacao()$ibge < 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
+  ### Calcula percentual de entes que recebem complementação ----
+  output$percentual_complemento = renderUI({
+    scales::percent(mean(simulacao()$complemento_uniao > 0), big.mark = ".", decimal.mark = ",", digits = 4)
+  })
+  
 ## Gráfico com complementação da união por UF e tipo de complementação ----
   output$graf_complementacao_modalidade = plotly::renderPlotly({
 ### Calculo do complementacao por unidade da federação ----
@@ -212,10 +218,18 @@ shinyServer(function(input, output) {
     
   })
   
-
+  ## Grafico diferença ----
+  tabela_resumo = reactive({
+    analise_diferenca_simulacoes(simulacao(), simulacao_base)
+  })
+  
+  ## Grafico diferença ----
+  tabela_regional = reactive({})  
+  
+  
 ## Tabela DT ----
   output$simulacao_dt = DT::renderDT(
-    simulacao(),
+    simulacao()[c('ibge', 'uf', 'nome', 'recursos_vaaf', 'recursos_vaat', 'nse', 'recursos_vaaf_final', 'vaaf_final', 'vaat_pre', 'recursos_vaat_final', 'vaat_final', 'complemento_vaaf', 'complemento_vaat', 'complemento_uniao', 'recursos_fundeb')],
     server = FALSE,
     filter = 'top',
     class = 'cell-border stripe',
@@ -229,12 +243,31 @@ shinyServer(function(input, output) {
       ordering = TRUE,
       scrollX = TRUE,
       dom = 'Bftsp',
-      buttons = c('csv', 'excel')
+      buttons = list('csv', 'excel')
     )
   )
+ 
+  ## Tabela DT ----
+  output$tabela_resumo = DT::renderDT(
+    tabela_resumo(),
+    server = FALSE,
+    filter = 'top',
+    class = 'cell-border stripe',
+    extensions = 'Buttons',
+    #### Opções adicionais
+    options = list(
+      autoWidth = TRUE,
+      paging = TRUE,
+      searching = TRUE,
+      fixedColumns = TRUE,
+      ordering = TRUE,
+      scrollX = TRUE,
+      dom = 'Bftsp',
+      buttons = list('csv', 'excel')
+    )
+  ) 
   
-  
-  
+  # Carrega dados de pesos previamente ----
   outputOptions(output, "pesos_vaat", suspendWhenHidden = FALSE)
   outputOptions(output, "pesos_vaaf", suspendWhenHidden = FALSE)
 })

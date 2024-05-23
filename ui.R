@@ -1,4 +1,4 @@
-# Define a Interface de Usuario
+# Define a Interface de Usuario ----
 ui = tagList(
   includeCSS("estilo.css"),
   shinyWidgets::useShinydashboard(),
@@ -72,7 +72,7 @@ ui = tagList(
             fill = TRUE
           ),
           infoBox(
-            HTML(paste("VAAF Mínimo", br(), "Quintil inferior")),
+            HTML("VAAF Mínimo"),
             uiOutput("box_min_vaaf"),
             icon = icon("line-chart"),
             color = "green",
@@ -92,7 +92,16 @@ ui = tagList(
             icon = icon("line-chart"),
             color = "aqua",
             fill = TRUE
-          )),
+          ),
+        infoBox(
+          HTML(paste("Percentual de", br(), "Entes que recebem complementação")),
+          uiOutput("percentual_complemento"),
+          icon = icon("line-chart"),
+          color = "olive",
+          fill = TRUE
+        )),
+        br(),
+        shinycssloaders::withSpinner(DT::dataTableOutput("tabela_resumo")),
         br(),
         h1("Síntese da Diferença por UF"),
         br(),
@@ -121,17 +130,12 @@ ui = tagList(
                       h2("Fator por Tipo e Modalidade"),
                       uiOutput("pesos_vaat")
                     ))),
+    tabPanel('Análise regional'),
     tabPanel("Documentação", 
              column(2),
              column(8,
                     withMathJax(
                       shiny::includeMarkdown("documentacao.md")
-                    ))),
-    tabPanel("Tabela - Simulação",
-             column(2),
-             column(8,
-                    withMathJax(
-                      shiny::includeMarkdown("documentacao_tabela_gerada.md")
                     )))),
   tags$footer(HTML("
                     <!-- Footer -->
