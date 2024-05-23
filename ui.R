@@ -53,7 +53,11 @@ ui = tagList(
                    value = c(1)
                  )),
     actionButton("botao", "Simular", width = "100%",
-                     style='font-size:200%')),
+                     style='font-size:200%'),
+    br(),
+    br(),
+    downloadButton('dicionario', "Baixa dicionário\nde dados", width = "100%",
+                   style='font-size:200%')),
       column(8,
         h1("Informações Básicas"),
         ### Linha com os infoboxes
@@ -87,7 +91,7 @@ ui = tagList(
             fill = TRUE
           ),
           infoBox(
-            HTML(paste("Complementação da", br(), "ao Estados")),
+            HTML(paste("Complementação da", br(), "União aos Estados")),
             uiOutput("box_compl_estadual"),
             icon = icon("line-chart"),
             color = "aqua",
@@ -101,6 +105,7 @@ ui = tagList(
           fill = TRUE
         )),
         br(),
+        h1('Tabela Resumo'),
         shinycssloaders::withSpinner(DT::dataTableOutput("tabela_resumo")),
         br(),
         h1("Síntese da Diferença por UF"),
@@ -130,7 +135,63 @@ ui = tagList(
                       h2("Fator por Tipo e Modalidade"),
                       uiOutput("pesos_vaat")
                     ))),
-    tabPanel('Análise regional'),
+    tabPanel('Análise regional',
+             fluidRow(
+               column(4,
+                      wellPanel(
+                      selectInput("estado_analise", "Escola uma região:",
+                                  list(Norte = c("AM", "PA", "AC", 'RR', "RO", 'AP', 'TO'),
+                                       Nordeste = c("CE", 'PE', 'PI', 'SE', 'AL', 'RN', 'BA', 'MA', 'PB'),
+                                       Sudeste = c("SP", "RJ", "ES", 'MG'),
+                                       Sul = c('RS', "PR", 'SC'),
+                                       `Centro-Oeste` = c('DF', 'GO', 'MS', 'MT'))
+                      ))),
+               column(8,
+                      fluidRow(infoBox(
+                        "VAAT Máximo",
+                        uiOutput("box_max_vaat_regional"),
+                        icon = icon("line-chart"),
+                        color = "orange",
+                        fill = TRUE
+                      ),
+                      infoBox(
+                        "VAAT Mínimo",
+                        uiOutput("box_min_vaat_regional"),
+                        icon = icon("line-chart"),
+                        color = "purple",
+                        fill = TRUE
+                      ),
+                      infoBox(
+                        HTML("VAAF Mínimo"),
+                        uiOutput("box_min_vaaf_regional"),
+                        icon = icon("line-chart"),
+                        color = "green",
+                        fill = TRUE
+                      )),
+                      fluidRow(
+                        infoBox(
+                          HTML(paste("Complementação da", br(), "União aos Municípios")),
+                          uiOutput("box_compl_municipal_regional"),
+                          icon = icon("line-chart"),
+                          color = "blue",
+                          fill = TRUE
+                        ),
+                        infoBox(
+                          HTML(paste("Complementação da", br(), "União aos Estados")),
+                          uiOutput("box_compl_estadual_regional"),
+                          icon = icon("line-chart"),
+                          color = "aqua",
+                          fill = TRUE
+                        ),
+                        infoBox(
+                          HTML(paste("Percentual de", br(), "Entes que recebem complementação")),
+                          uiOutput("percentual_complemento_regional"),
+                          icon = icon("line-chart"),
+                          color = "olive",
+                          fill = TRUE
+                        )),
+                      h1('Tabela Resumo'),
+                      shinycssloaders::withSpinner(DT::dataTableOutput("tabela_resumo_regional"))))),
     tabPanel("Documentação", 
              column(2),
              column(8,
