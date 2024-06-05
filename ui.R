@@ -41,23 +41,22 @@ ui = tagList(
                  sliderInput(
                    "social",
                    "Fator do nível socioeconômico:",
-                   min = 1,
+                   min = .5,
                    max = 2,
-                   value = c(1)
+                   value = c(.95, 1.05)
                  ),
                  sliderInput(
                    "fiscal",
                    "Fator da disponibilidade de recursos vinculados:",
-                   min = 1,
+                   min = .5,
                    max = 2,
                    value = c(1)
                  )),
-    actionButton("botao", "Simular", width = "100%",
-                     style='font-size:200%'),
+    actionButton("botao", "Simular", 
+                     style='font-size:200%;width:100%'),
     br(),
     br(),
-    downloadButton('dicionario', "Baixa dicionário\nde dados", width = "100%",
-                   style='font-size:200%')),
+    downloadButton('dicionario', "Baixa dicionário\nde dados", style='font-size:200%;width:100%;color:white')),
       column(8,
         h1("Informações Básicas"),
         ### Linha com os infoboxes
@@ -122,7 +121,7 @@ ui = tagList(
         ### Tabela com resultados da simulação
         shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))
       ))),
-    tabPanel('Pesos',
+    tabPanel('Pesos', value = 'pesos',
              column(6,
                     # Pesos por etapa e modalidade
                     wellPanel(

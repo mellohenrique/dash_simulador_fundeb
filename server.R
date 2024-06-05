@@ -1,5 +1,5 @@
 # Inicio do Server ----
-shinyServer(function(input, output) {
+server = function(input, output, session) {
   source('analise_diferenca_simulacoes.R')
   ## Cria sliders para UI ----
   ### VAAF ----
@@ -82,7 +82,9 @@ shinyServer(function(input, output) {
       dados_peso = pesos_app(),
       complementacao_vaaf = input$complementacao_vaaf,
       complementacao_vaat = input$complementacao_vaat,
-      complementacao_vaar = 0
+      complementacao_vaar = 0,
+      max_nse = input$social[[2]],
+      min_nse = input$social[[1]]
     )
 
 ### Retorna resultado da simulacao----
@@ -267,10 +269,18 @@ shinyServer(function(input, output) {
     analise_diferenca_simulacoes(simulacao_analise_regional(), simulacao_base)
   })  
   
+  tabela_final = reactive({
+    tabela_final = merge(simulacao(), simulacao_base, on = c('ibge', 'nome', 'uf'), suffixes = c('_simulacao', '_base'))
+    
+    tabela_final = tabela_final[,c('uf', 'ibge', 'nome', )]
+    
+    tabela_final
+  })
+  
   
 ## Tabela DT ----
   output$simulacao_dt = DT::renderDT(
-    simulacao()[c('ibge', 'uf', 'nome', 'recursos_vaaf', 'recursos_vaat', 'nse', 'recursos_vaaf_final', 'vaaf_final', 'vaat_pre', 'recursos_vaat_final', 'vaat_final', 'complemento_vaaf', 'complemento_vaat', 'complemento_uniao', 'recursos_fundeb')],
+    tabela_final(),
     server = FALSE,
     filter = 'top',
     class = 'cell-border stripe',
@@ -297,7 +307,7 @@ shinyServer(function(input, output) {
     extensions = 'Buttons',
     #### Opções adicionais
     options = list(
-      autoWidth = TRUE,
+      autoWidth = FALSE,
       paging = FALSE,
       searching = FALSE,
       fixedColumns = TRUE,
@@ -317,17 +327,27 @@ shinyServer(function(input, output) {
     extensions = 'Buttons',
     #### Opções adicionais
     options = list(
-      autoWidth = TRUE,
+      autoWidth = FALSE,
       paging = FALSE,
       searching = FALSE,
       fixedColumns = TRUE,
       ordering = TRUE,
-      scrollX = TRUE,
+      scrollX = FALSE,
       dom = 'Bftsp',
       buttons = list('csv', 'excel')
     )
   ) 
+  
+  # Troca tab ----
+  
+  output$dicionario <- downloadHandler(
+    filename = 'dicionario.xlsx',
+    content = function(file) {
+      #temp <- file.path(tempdir(), "report.Rmd")
+      file.copy(file.path(getwd(),'dicionario.xlsx'), file, overwrite = TRUE)
+    })
+  
   # Carrega dados de pesos previamente ----
   outputOptions(output, "pesos_vaat", suspendWhenHidden = FALSE)
   outputOptions(output, "pesos_vaaf", suspendWhenHidden = FALSE)
-})
+}
