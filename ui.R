@@ -39,17 +39,17 @@ ui = tagList(
       wellPanel(
         h2("Fatores de ponderação"),
                  sliderInput(
-                   "social",
+                   "nse",
                    "Fator do nível socioeconômico:",
                    min = 1,
-                   max = 2,
-                   value = c(1)
+                   max = 4,
+                   value = c(1.1)
                  ),
                  sliderInput(
-                   "fiscal",
+                   "nf",
                    "Fator da disponibilidade de recursos vinculados:",
                    min = 1,
-                   max = 2,
+                   max = 4,
                    value = c(1)
                  )),
     actionButton("botao", "Simular", width = "100%",
@@ -112,13 +112,13 @@ ui = tagList(
              column(6,
                     # Pesos por etapa e modalidade
                     wellPanel(
-                      h2("Fator por Tipo e Modalidade"),
+                      h2("Fator por Tipo e Modalidade-VAAF"),
                       uiOutput("pesos_vaaf")
                     )),
              column(6,
                     # Pesos por etapa e modalidade
                     wellPanel(
-                      h2("Fator por Tipo e Modalidade"),
+                      h2("Fator por Tipo e Modalidade-VAAT"),
                       uiOutput("pesos_vaat")
                     ))),
     tabPanel("Documentação", 

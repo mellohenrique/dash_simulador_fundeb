@@ -17,11 +17,12 @@ shinyServer(function(input, output) {
   ### VAAT ----
   output$pesos_vaat = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
-      sliderInput(
+      numericInput(
         label = pesos$nome[[i]],
         inputId = paste0("pesos_vaat_", i),
         min = 0.8,
         max = 3.5,
+        step = .1,
         value = c(pesos$peso_vaat[[i]])
       )
     })
@@ -81,7 +82,11 @@ shinyServer(function(input, output) {
       dados_peso = pesos_app(),
       complementacao_vaaf = 24153287047,
       complementacao_vaat = 18114965285,
-      complementacao_vaar = 0
+      complementacao_vaar = 0,
+      max_nse = input$nse,
+      min_nse = 1,
+      max_nf = input$nf,
+      min_nf = 1
     )
 
 ### Retorna resultado da simulacao----
@@ -143,7 +148,7 @@ shinyServer(function(input, output) {
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Categoria Administrativa<b>")
+    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
 ### Retorna figura  
     fig 
   })
@@ -176,7 +181,7 @@ shinyServer(function(input, output) {
       type = "bar",
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} milhões<extra></extra>"
     )
-    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
+    fig =  layout(fig, separators = ',.', barmode = "stack", xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Categoria Administrativa<b>")
     ### Retorna figura  
     fig 
   })
