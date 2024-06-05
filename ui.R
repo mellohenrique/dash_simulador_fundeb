@@ -72,7 +72,7 @@ ui = tagList(
             fill = TRUE
           ),
           infoBox(
-            HTML(paste("VAAF Mínimo", br(), "Quintil inferior")),
+            HTML(paste("VAAF Mínimo")),
             uiOutput("box_min_vaaf"),
             icon = icon("line-chart"),
             color = "green",
@@ -103,10 +103,7 @@ ui = tagList(
         br(),
         h1("Síntese da Complementação da União – 2024"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_destino")),
-        br(),
-        ### Planilha com resultados da simulação ----
-        h1("Planilha com os resultados"),
-        shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))
+        br()
       ))),
     tabPanel('Pesos',
              column(6,
@@ -130,9 +127,10 @@ ui = tagList(
     tabPanel("Tabela - Simulação",
              column(2),
              column(8,
-                    withMathJax(
-                      shiny::includeMarkdown("documentacao_tabela_gerada.md")
-                    )))),
+                    ### Planilha com resultados da simulação ----
+                    h1("Planilha com os resultados"),
+                    shinycssloaders::withSpinner(DT::dataTableOutput("simulacao_dt"))
+                    ))),
   tags$footer(HTML("
                     <!-- Footer -->
                            <footer class='page-footer font-large indigo'>

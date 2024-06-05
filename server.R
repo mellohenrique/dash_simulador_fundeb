@@ -238,8 +238,6 @@ shinyServer(function(input, output) {
     )
   )
   
-  
-  
   outputOptions(output, "pesos_vaat", suspendWhenHidden = FALSE)
   outputOptions(output, "pesos_vaaf", suspendWhenHidden = FALSE)
 })
