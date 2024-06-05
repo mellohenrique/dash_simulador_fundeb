@@ -1,5 +1,6 @@
 # Inicio do Server ----
-shinyServer(function(input, output) {
+server = function(input, output, session) {
+  source('analise_diferenca_simulacoes.R')
   ## Cria sliders para UI ----
   ### VAAF ----
   output$pesos_vaaf = renderUI({
@@ -77,7 +78,7 @@ shinyServer(function(input, output) {
     
 ## Simulacao ----
     simulacao = simulador.fundeb::simula_fundeb(
-      dados_alunos = matriculas,
+      dados_matriculas = matriculas,
       dados_complementar = complementar,
       dados_peso = pesos_app(),
       complementacao_vaaf = 24153287047,
@@ -93,30 +94,74 @@ shinyServer(function(input, output) {
     simulacao
     })
   
+## Filtro regional
+  simulacao_analise_regional = reactive({
+    simulcao_regional = simulacao()[simulacao()$uf %in% input$estado_analise,]
+    
+    simulcao_regional
+  })
+  
 ## Valores para Infoboxes ----
-### Calcula valor maximo do VAAT para info box ----
+### Nacional ----
+#### Calcula valor maximo do VAAT para info box ----
   output$box_max_vaat = renderUI({
     prettyNum(max(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-### Calcula minimo VAAF para info box ----
+#### Calcula minimo VAAF para info box ----
   output$box_min_vaaf = renderUI({
     prettyNum(min(simulacao()$vaaf_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-  ### Calcula minimo VAAT para info box ----
+#### Calcula minimo VAAT para info box ----
   output$box_min_vaat = renderUI({
     prettyNum(min(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-### Calcula total VAAT da complementação municipal ----
+#### Calcula total VAAT da complementação municipal ----
   output$box_compl_municipal = renderUI({
     prettyNum(sum(simulacao()[simulacao()$ibge > 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
-### Calcula total VAAT da complementação estadual ----
+#### Calcula total VAAT da complementação estadual ----
   output$box_compl_estadual = renderUI({
     prettyNum(sum(simulacao()[simulacao()$ibge < 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
+  })
+  
+#### Calcula percentual de entes que recebem complementação ----
+  output$percentual_complemento = renderUI({
+    scales::percent(mean(simulacao()$complemento_uniao > 0), big.mark = ".", decimal.mark = ",", digits = 4)
+  })
+  
+### Regional ----
+#### Calcula valor maximo do VAAT para info box ----
+  output$box_max_vaat_regional = renderUI({
+    prettyNum(max(simulacao_analise_regional()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
+  })
+  
+#### Calcula minimo VAAF para info box ----
+  output$box_min_vaaf_regional = renderUI({
+    prettyNum(min(simulacao_analise_regional()$vaaf_final), big.mark = ".", decimal.mark = ",", digits = 4)
+  })
+  
+#### Calcula minimo VAAT para info box ----
+  output$box_min_vaat_regional = renderUI({
+    prettyNum(min(simulacao_analise_regional()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
+  })
+  
+#### Calcula total VAAT da complementação municipal ----
+  output$box_compl_municipal_regional = renderUI({
+    prettyNum(sum(simulacao_analise_regional()[simulacao_analise_regional()$ibge > 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
+  })
+  
+#### Calcula total VAAT da complementação estadual ----
+  output$box_compl_estadual_regional = renderUI({
+    prettyNum(sum(simulacao_analise_regional()[simulacao_analise_regional()$ibge < 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
+  })
+  
+#### Calcula percentual de entes que recebem complementação ----
+  output$percentual_complemento_regional = renderUI({
+    scales::percent(mean(simulacao_analise_regional()$complemento_uniao > 0), big.mark = ".", decimal.mark = ",", digits = 4)
   })
   
 ## Gráfico com complementação da união por UF e tipo de complementação ----
@@ -197,7 +242,7 @@ shinyServer(function(input, output) {
     
     comparacao = merge(complementacao_atual, simulacao_base_agregada, by = 'uf')
     
-    comparacao$diff = comparacao$complemento_atual - comparacao$complemento_base
+    comparacao$diff = comparacao$complemento_atual - comparacao$complemento_uniao
     
     comparacao = comparacao[order(comparacao$diff * -1),]
     comparacao$uf = factor(comparacao$uf, levels = comparacao$uf, ordered = TRUE)
@@ -217,10 +262,26 @@ shinyServer(function(input, output) {
     
   })
   
+  ## Grafico diferença ----
+  tabela_resumo = reactive({
+    analise_diferenca_simulacoes(simulacao(), simulacao_base)
+  })
+  
+  ## Grafico diferença ----
+  tabela_resumo_regional = reactive({
+    analise_diferenca_simulacoes(simulacao_analise_regional(), simulacao_base)
+  })  
+  
+  tabela_final = reactive({
+    tabela_final = merge(simulacao(), simulacao_base, on = c('ibge', 'nome', 'uf'), suffixes = c('_simulacao', '_base'))
 
+    tabela_final
+  })
+  
+  
 ## Tabela DT ----
   output$simulacao_dt = DT::renderDT(
-    simulacao(),
+    tabela_final(),
     server = FALSE,
     filter = 'top',
     class = 'cell-border stripe',
@@ -234,10 +295,60 @@ shinyServer(function(input, output) {
       ordering = TRUE,
       scrollX = TRUE,
       dom = 'Bftsp',
-      buttons = c('csv', 'excel')
+      buttons = list('csv', 'excel')
     )
   )
+ 
+  ## Tabela DT ----
+  output$tabela_resumo = DT::renderDT(
+    tabela_resumo(),
+    server = FALSE,
+    filter = 'top',
+    class = 'cell-border stripe',
+    extensions = 'Buttons',
+    #### Opções adicionais
+    options = list(
+      autoWidth = FALSE,
+      paging = FALSE,
+      searching = FALSE,
+      fixedColumns = TRUE,
+      ordering = TRUE,
+      scrollX = TRUE,
+      dom = 'Bftsp',
+      buttons = list('csv', 'excel')
+    )
+  ) 
+
+  ## Tabela DT ----
+  output$tabela_resumo_regional = DT::renderDT(
+    tabela_resumo_regional(),
+    server = FALSE,
+    filter = 'top',
+    class = 'cell-border stripe',
+    extensions = 'Buttons',
+    #### Opções adicionais
+    options = list(
+      autoWidth = FALSE,
+      paging = FALSE,
+      searching = FALSE,
+      fixedColumns = TRUE,
+      ordering = TRUE,
+      scrollX = FALSE,
+      dom = 'Bftsp',
+      buttons = list('csv', 'excel')
+    )
+  ) 
   
+  # Dicionário ----
+  
+  output$dicionario <- downloadHandler(
+    filename = 'dicionario.xlsx',
+    content = function(file) {
+      #temp <- file.path(tempdir(), "report.Rmd")
+      file.copy(file.path(getwd(),'dicionario.xlsx'), file, overwrite = TRUE)
+    })
+  
+  # Carrega dados de pesos previamente ----
   outputOptions(output, "pesos_vaat", suspendWhenHidden = FALSE)
   outputOptions(output, "pesos_vaaf", suspendWhenHidden = FALSE)
-})
+}
