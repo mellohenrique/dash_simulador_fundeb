@@ -43,45 +43,64 @@ ui = tagList(
                    "Fator do nível socioeconômico:",
                    min = 1,
                    max = 4,
-                   value = c(1.1)
+                   value = c(1.1),
+                   step = .05
                  ),
                  sliderInput(
                    "nf",
                    "Fator da disponibilidade de recursos vinculados:",
                    min = 1,
                    max = 4,
-                   value = c(1)
+                   value = c(1),
+                   step = .05
                  )),
     actionButton("botao", "Simular", 
-                     style='font-size:200%;width:100%'),
-    br(),
-    br(),
-    downloadButton('dicionario', "Baixa dicionário\nde dados", style='font-size:200%;width:100%;color:white')),
+                     style='font-size:200%;width:100%')),
       column(8,
         h1("Informações Básicas"),
         ### Linha com os infoboxes
           fluidRow(infoBox(
-            "VAAT Máximo",
-            uiOutput("box_max_vaat"),
+            HTML("VAAT Mínimo <br> Simulado"),
+            uiOutput("box_min_vaat"),
             icon = icon("line-chart"),
             color = "orange",
             fill = TRUE
           ),
           infoBox(
-            "VAAT Mínimo",
-            uiOutput("box_min_vaat"),
+            HTML("VAAT Mínimo <br> Atual"),
+            8421,
             icon = icon("line-chart"),
             color = "purple",
             fill = TRUE
           ),
           infoBox(
-            HTML("VAAF Mínimo"),
+            HTML("VAAT Mínimo <br> Diferença"),
+            1,
+            icon = icon("line-chart"),
+            color = "purple",
+            fill = TRUE
+          ),
+          infoBox(
+            HTML("VAAF Mínimo <br> Simulado"),
             uiOutput("box_min_vaaf"),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
-          )),
-        fluidRow(
+          ),
+          infoBox(
+            HTML("VAAF Mínimo <br> Atual"),
+            5277,
+            icon = icon("line-chart"),
+            color = "green",
+            fill = TRUE
+          ),
+          infoBox(
+            HTML("VAAF Mínimo <br> Diferença"),
+            1,
+            icon = icon("line-chart"),
+            color = "green",
+            fill = TRUE
+          ),
           infoBox(
             HTML(paste("Complementação da", br(), "União aos Municípios")),
             uiOutput("box_compl_municipal"),
@@ -96,13 +115,13 @@ ui = tagList(
             color = "aqua",
             fill = TRUE
           ),
-        infoBox(
-          HTML(paste("Percentual de", br(), "Entes que recebem complementação")),
-          uiOutput("percentual_complemento"),
-          icon = icon("line-chart"),
-          color = "olive",
-          fill = TRUE
-        )),
+          infoBox(
+            HTML(paste("Percentual dos entes", br(), "que recebem complementação")),
+            uiOutput("percentual_complemento"),
+            icon = icon("line-chart"),
+            color = "aqua",
+            fill = TRUE
+          )),
         br(),
         h1('Tabela Resumo'),
         shinycssloaders::withSpinner(DT::dataTableOutput("tabela_resumo")),
@@ -195,7 +214,9 @@ ui = tagList(
                       shiny::includeMarkdown("documentacao.md")
                     ))),
     tabPanel("Tabela - Simulação",
-             column(2),
+             column(2,
+                    
+                    downloadButton('dicionario', "Dicionário de dados", style='font-size:150%;heigth:200%;width:100%;color:white')),
              column(8,
                     ### Planilha com resultados da simulação ----
                     h1("Planilha com os resultados"),

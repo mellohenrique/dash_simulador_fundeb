@@ -1,12 +1,12 @@
 # Inicio do Server ----
 server = function(input, output, session) {
-  source('analise_diferenca_simulacoes.R')
+  source('analise_diferenca_simulacoes.R', encoding = 'UTF-8')
   ## Cria sliders para UI ----
   ### VAAF ----
   output$pesos_vaaf = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       sliderInput(
-        label = pesos$nome[[i]],
+        label = paste(i, '-', pesos$nome[[i]]),
         inputId = paste0("pesos_vaaf_", i),
         min = 0.8,
         max = 3.5,
@@ -19,7 +19,7 @@ server = function(input, output, session) {
   output$pesos_vaat = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
       numericInput(
-        label = pesos$nome[[i]],
+        label = paste(i, '-', pesos$nome[[i]]),
         inputId = paste0("pesos_vaat_", i),
         min = 0.8,
         max = 3.5,
