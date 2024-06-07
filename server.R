@@ -1,6 +1,8 @@
 # Inicio do Server ----
 server = function(input, output, session) {
   source('analise_diferenca_simulacoes.R', encoding = 'UTF-8')
+  source('texto_entrada.R', encoding = 'UTF-8')
+  
   ## Cria sliders para UI ----
   ### VAAF ----
   output$pesos_vaaf = renderUI({
@@ -91,7 +93,13 @@ server = function(input, output, session) {
     )
 
 ### Retorna resultado da simulacao----
+    simulacao[, c('matriculas_vaaf', 'matriculas_vaat',  'recursos_vaaf', 'recursos_vaat',  'recursos_vaaf_final', 'vaaf_final', 'vaat_pre', 'recursos_vaat_final', 'vaat_final', 'complemento_vaaf', 'complemento_vaat', 'complemento_uniao', 'recursos_fundeb')] = lapply(simulacao[, c('matriculas_vaaf', 'matriculas_vaat',  'recursos_vaaf', 'recursos_vaat',  'recursos_vaaf_final', 'vaaf_final', 'vaat_pre', 'recursos_vaat_final', 'vaat_final', 'complemento_vaaf', 'complemento_vaat', 'complemento_uniao', 'recursos_fundeb')], round, 2)
+    
+
+    simulacao = simulacao[, c('ibge', 'uf', 'nome', 'matriculas_vaaf', 'matriculas_vaat', "inabilitados_vaat", 'nse', 'nf', 'recursos_vaaf', 'recursos_vaat',  'recursos_vaaf_final', 'vaaf_final', 'vaat_pre', 'recursos_vaat_final', 'vaat_final', 'complemento_vaaf', 'complemento_vaat', 'complemento_uniao', 'recursos_fundeb')]
+    
     simulacao
+    
     })
   
 ## Filtro regional
@@ -272,12 +280,14 @@ server = function(input, output, session) {
     analise_diferenca_simulacoes(simulacao_analise_regional(), simulacao_base)
   })  
   
-  tabela_final = reactive({
-    tabela_final = merge(simulacao(), simulacao_base, on = c('ibge', 'nome', 'uf'), suffixes = c('_simulacao', '_base'))
-
-    tabela_final
-  })
   
+## Define tabela final a ser enviada para o usuário ----
+  tabela_final = reactive({
+    tabela = dplyr::left_join(simulacao(), simulacao_base, by = c('ibge', 'nome', 'uf'), suffix = c('_simulacao', '_base'))
+    
+    
+    tabela
+  })
   
 ## Tabela DT ----
   output$simulacao_dt = DT::renderDT(
@@ -351,4 +361,7 @@ server = function(input, output, session) {
   # Carrega dados de pesos previamente ----
   outputOptions(output, "pesos_vaat", suspendWhenHidden = FALSE)
   outputOptions(output, "pesos_vaaf", suspendWhenHidden = FALSE)
+  
+  
+  shinyalert::shinyalert(text = texto_entrada)
 }

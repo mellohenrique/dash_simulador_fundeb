@@ -8,6 +8,7 @@ library("shinydashboardPlus")
 library("markdown")
 library("simulador.fundeb")
 library("shinycssloaders")
+library('shinyalert')
 options(scipen=999)
 
 # Carrega dados

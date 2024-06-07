@@ -126,15 +126,20 @@ ui = tagList(
         h1('Tabela Resumo'),
         shinycssloaders::withSpinner(DT::dataTableOutput("tabela_resumo")),
         br(),
+        HTML('<ul><li>A Tabela apresenta uma série de medidas de comparação entre a simulação e o cenário base.</li></ul>'),
+        br(),
         h1("Síntese da Diferença por UF"),
         br(),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_diff_uf")),
+        HTML('<ul><li>O Gráfico faz um comparação entre o montante de recursos do Fundeb de cada rede estadual, comprando a simulação com o cenário base.</li></ul>'),
         br(),
         h1("Síntese da Complementação da União – 2024"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_modalidade")),
+        HTML('<ul><li>O Gráfico apresenta a quantidade de recursos que cada rede estadual recebe de complementação da União pelo Fundeb no cenário simulado, divindo entre o montante que vai para as redes educacionais municipais e o quanto vai para a a rede estadual.</li></ul>'),
         br(),
         h1("Síntese da Complementação da União – 2024"),
         shinycssloaders::withSpinner(plotly::plotlyOutput("graf_complementacao_destino")),
+        HTML('<ul><li>O Gráfico apresenta a quantidade de recursos que cada rede estadual recebe de complementação da União pelo Fundeb no cenário simulado, divindo entre o montante recebido pela modalidade VAAF e o montante recebido pela modalidade VAAT.</li></ul>'),
         br()
       ))),
     tabPanel('Pesos', value = 'pesos',
@@ -215,7 +220,7 @@ ui = tagList(
                     ))),
     tabPanel("Tabela - Simulação",
              column(2,
-                    
+                    ### Botão de download do dicionário de dados ----
                     downloadButton('dicionario', "Dicionário de dados", style='font-size:150%;heigth:200%;width:100%;color:white')),
              column(8,
                     ### Planilha com resultados da simulação ----
