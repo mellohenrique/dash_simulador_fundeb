@@ -14,8 +14,8 @@ Utilizando dados de matrículas fornecidos pelo Instituto Nacional de Estudos e 
 
 A ferramenta é composta por dois projetos principais:
 
-*	O pacote em R criado para realizar as simulações, disponível no [simulador.fundeb].
-*	O aplicativo em Shiny, cujo código pode ser obtido no link do [dash_simulador_fundeb].
+*	O pacote em R criado para realizar as simulações, disponível: [simulador.fundeb](https://github.com/mellohenrique/simulador.fundeb).
+*	O aplicativo em Shiny, cujo código pode ser obtido no link: [dash_simulador_fundeb](https://github.com/mellohenrique/dash_simulador_fundeb).
 
 O simulador abrange as complementações-VAAF e VAAT, não incluindo a complementação-VAAR.
 
@@ -39,7 +39,7 @@ A complementação-VAAR (Valor Aluno Ano Resultado) destina-se a entes que apres
 
 * Os dados de alunos foram retirados da [portaria interministerial número 1, de 23/02/2024](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/matriculas-da-educacao-basica/copy_of_2024-com-base-na-portaria-interministerial-no-6-de-28-12-2023);
 * Os valores de receitas do Fundeb foram obtidos no portal do [FNDE](https://www.gov.br/fnde/pt-br/acesso-a-informacao/acoes-e-programas/financiamento/fundeb/2024-1);
-* •	Os pesos utilizados foram extraídos da [Resolução MEC nº 04, de 30 de outubro de 2023](https://www.gov.br/mec/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/comissao-intergovernamental-fundeb/Resoluo4_30102023.pdf).
+* Os pesos utilizados foram extraídos da [Resolução MEC nº 04, de 30 de outubro de 2023](https://www.gov.br/mec/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/comissao-intergovernamental-fundeb/Resoluo4_30102023.pdf).
 * O fator relativo ao Indicador de Nível Socioeconômico (NSE) ampara-se na [Nota Técnica nº 16/2023/CGEE/DIRED/Inep](https://download.inep.gov.br/areas_de_atuacao/fundeb/nota_tecnica_16_2023.pdf)  e os dados estão disponíveis no portal do Inep;
 * O fator de disponibilidade de recursos vinculados à educação (DRec) baseia-se na [Nota Técnica nº 2312/2023/MF](https://www.gov.br/mec/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/comissao-intergovernamental-fundeb/Nota_Tecnica_2312_2023_MF.pdf)  e os dados estão disponíveis no portal do FNDE .
 
