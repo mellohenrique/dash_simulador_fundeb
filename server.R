@@ -7,6 +7,18 @@ server = function(input, output, session) {
   source('texto_entrada.R', encoding = 'UTF-8')
   source('utils.R', encoding = 'UTF-8')
   
+  ## Lista de opções do DT
+  opcoes_DT = list(
+    autoWidth = FALSE,
+    paging = FALSE,
+    searching = FALSE,
+    fixedColumns = TRUE,
+    ordering = TRUE,
+    scrollX = FALSE,
+    dom = 'Bftsp',
+    buttons = list('csv', 'excel')
+  )
+  
   ## Cria sliders para UI ----
   ### VAAF ----
   output$pesos_vaaf = renderUI({
@@ -188,7 +200,7 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} reais<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
+    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Comparação do VAAF da simulação com o cenário atual<b>")
     ### Retorna figura  
     fig 
   })
@@ -214,7 +226,7 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} reais<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
+    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Comparação do VAAT da simulação com o cenário atual<b>")
     ### Retorna figura  
     fig 
   })
@@ -313,23 +325,40 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
     
     
   })
-  
-  ## Grafico diferença ----
+## Gera tabelas de resumo
+### Gera tabela resumo nacional ----
   tabela_resumo = reactive({
     tabela_resumo = analise_diferenca_simulacoes(simulacao_comparada())
     
     tabela_resumo
   })
   
-  ## Grafico diferença ----
+### Gera tabela resumo regional ----
   tabela_resumo_regional = reactive({
     tabela_resumo_regional = analise_diferenca_simulacoes(simulacao_comparada_regional())
     
     tabela_resumo_regional
   })  
+
+### Gera tabela de vencedores e perdedores ----
+lista_vencedores_perdedores = reactive({
+  lista_vencedores_perdedores = analise_vencedores_perdedores(simulacao_comparada())
   
+  lista_vencedores_perdedores
+})
+
+tabela_vencedores_vaaf = reactive({
+  tabela_vencedores_vaaf = lista_vencedores_perdedores()$tabela_vaaf
   
-## Define tabela final a ser enviada para o usuário ----
+  tabela_vencedores_vaaf
+  })
+
+tabela_vencedores_vaat = reactive({
+  tabela_vencedores_vaat = lista_vencedores_perdedores()$tabela_vaat
+  
+  tabela_vencedores_vaat
+})  
+### Gera tabela final a ser enviada para o usuário ----
   tabela_final = reactive({
     if (input$botao == 0) {
       names(cenario_atual) = c('ibge', 'uf', 'nome', paste0(names(cenario_atual)[4:19], '_atual'))
@@ -341,7 +370,7 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
     
   })
   
-## Tabela DT ----
+## Tabela da simulacao completa ----
   output$simulacao_dt = DT::renderDT(
     tabela_final(),
     server = FALSE,
@@ -361,7 +390,7 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
     )
   )
  
-  ## Tabela DT ----
+### Tabela resumo nacional ----
   output$tabela_resumo = DT::renderDT(
     tabela_resumo(),
     server = FALSE,
@@ -369,19 +398,10 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
     class = 'cell-border stripe',
     extensions = 'Buttons',
     #### Opções adicionais
-    options = list(
-      autoWidth = FALSE,
-      paging = FALSE,
-      searching = FALSE,
-      fixedColumns = TRUE,
-      ordering = TRUE,
-      scrollX = TRUE,
-      dom = 'Bftsp',
-      buttons = list('csv', 'excel')
-    )
+    options = opcoes_DT
   ) 
 
-  ## Tabela DT ----
+### Tabela resumo regional ----
   output$tabela_resumo_regional = DT::renderDT(
     tabela_resumo_regional(),
     server = FALSE,
@@ -389,28 +409,40 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
     class = 'cell-border stripe',
     extensions = 'Buttons',
     #### Opções adicionais
-    options = list(
-      autoWidth = FALSE,
-      paging = FALSE,
-      searching = FALSE,
-      fixedColumns = TRUE,
-      ordering = TRUE,
-      scrollX = FALSE,
-      dom = 'Bftsp',
-      buttons = list('csv', 'excel')
-    )
+    options = opcoes_DT
   ) 
   
-  # Dicionário ----
+### Tabela resumo de vencedores vaaf ----
+output$tabela_vencedores_vaaf = DT::renderDT(
+  tabela_vencedores_vaaf(),
+  server = FALSE,
+  filter = 'top',
+  class = 'cell-border stripe',
+  extensions = 'Buttons',
+  #### Opções adicionais
+  options = opcoes_DT
+) 
+
+### Tabela resumo de vencedores vaat ----
+output$tabela_vencedores_vaat = DT::renderDT(
+  tabela_vencedores_vaat(),
+  server = FALSE,
+  filter = 'top',
+  class = 'cell-border stripe',
+  extensions = 'Buttons',
+  #### Opções adicionais
+  options = opcoes_DT
+) 
+
+  ## Dicionário ----
   
   output$dicionario <- downloadHandler(
     filename = 'dicionario.xlsx',
     content = function(file) {
-      #temp <- file.path(tempdir(), "report.Rmd")
       file.copy(file.path(getwd(),'dicionario.xlsx'), file, overwrite = TRUE)
     })
   
-  # Carrega dados de pesos previamente ----
+  ## Carrega dados de pesos previamente ----
   outputOptions(output, "pesos_vaat", suspendWhenHidden = FALSE)
   outputOptions(output, "pesos_vaaf", suspendWhenHidden = FALSE)
   
