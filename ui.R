@@ -1,20 +1,21 @@
 # Define a Interface de Usuario ----
 ui = tagList(
+## Estilo ----
   includeCSS("estilo.css"),
   shinyWidgets::useShinydashboard(),
   tags$head(HTML("<title>Simulador Fundeb (Em desenvolvimento)</title>")),
-  ## Define UI como pagina de navegacao
+### Define Tema ---
   navbarPage(
     theme = shinytheme("flatly"),
-    ### Define Tema
-    ### Barra 1
+### Barra Superior ----
     title = div(img(src = 'logo.png', style = "margin-top: -20px; margin-left: -20px; padding-right:-0px; padding-bottom:10px", height = 70)),
     selected = "Simulação",
+## Aba de Simulação ----
     tabPanel(
       title = "Simulação",
       fluidRow(
         column(4,
-        ### Complementacao da União
+### Complementacao da  ----
         h2("Complementação da União"),
           shinyWidgets::autonumericInput(
             width = "100%",
@@ -36,6 +37,7 @@ ui = tagList(
             digitGroupSeparator = ".",
             decimalPlaces = 0,
             min = 0),
+### Fatores de ponderação ----
       wellPanel(
         h2("Fatores de ponderação"),
                  sliderInput(
@@ -56,72 +58,76 @@ ui = tagList(
                  )),
     actionButton("botao", "Simular", 
                      style='font-size:200%;width:100%')),
+### Infoboxes ----
       column(8,
         h1("Informações Básicas"),
-        ### Linha com os infoboxes
           fluidRow(infoBox(
             HTML("VAAT Mínimo <br> Simulado"),
-            uiOutput("box_min_vaat"),
+            uiOutput("nacional_vaat"),
             icon = icon("line-chart"),
             color = "orange",
             fill = TRUE
           ),
           infoBox(
             HTML("VAAT Mínimo <br> Atual"),
-            8421,
+            scales::number(8420.96, big.mark = '.', decimal.mark = ','),
             icon = icon("line-chart"),
             color = "purple",
             fill = TRUE
           ),
           infoBox(
             HTML("VAAT Mínimo <br> Diferença"),
-            1,
+            uiOutput('nacional_dif_vaat'),
             icon = icon("line-chart"),
             color = "purple",
             fill = TRUE
           ),
           infoBox(
             HTML("VAAF Mínimo <br> Simulado"),
-            uiOutput("box_min_vaaf"),
+            uiOutput("nacional_vaaf"),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
           ),
           infoBox(
             HTML("VAAF Mínimo <br> Atual"),
-            5277,
+            scales::number(5361.43, big.mark = '.', decimal.mark = ','),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
           ),
           infoBox(
             HTML("VAAF Mínimo <br> Diferença"),
-            1,
+            uiOutput('nacional_dif_vaaf'),
             icon = icon("line-chart"),
             color = "green",
             fill = TRUE
           ),
           infoBox(
             HTML(paste("Complementação da", br(), "União aos Municípios")),
-            uiOutput("box_compl_municipal"),
+            uiOutput("nacional_compl_mun"),
             icon = icon("line-chart"),
             color = "blue",
             fill = TRUE
           ),
           infoBox(
             HTML(paste("Complementação da", br(), "União aos Estados")),
-            uiOutput("box_compl_estadual"),
+            uiOutput("nacional_compl_est"),
             icon = icon("line-chart"),
             color = "aqua",
             fill = TRUE
           ),
           infoBox(
             HTML(paste("Percentual dos entes", br(), "que recebem complementação")),
-            uiOutput("percentual_complemento"),
+            uiOutput("nacional_perc_compl"),
             icon = icon("line-chart"),
             color = "aqua",
             fill = TRUE
           )),
+        br(),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_vaaf_ufs")),
+        br(),
+        shinycssloaders::withSpinner(plotly::plotlyOutput("graf_vaat_ufs")),
         br(),
         h1('Tabela Resumo'),
         shinycssloaders::withSpinner(DT::dataTableOutput("tabela_resumo")),
@@ -155,6 +161,7 @@ ui = tagList(
                       h2("Fator por Tipo e Modalidade-VAAT"),
                       uiOutput("pesos_vaat")
                     ))),
+    ## Análise regional ----
     tabPanel('Análise regional',
              fluidRow(
                column(4,
@@ -166,52 +173,75 @@ ui = tagList(
                                        Sul = c('RS', "PR", 'SC'),
                                        `Centro-Oeste` = c('DF', 'GO', 'MS', 'MT'))
                       ))),
+ ### Infobox regional ----
                column(8,
+                      h1("Informações Básicas"),
                       fluidRow(infoBox(
-                        "VAAT Máximo",
-                        uiOutput("box_max_vaat_regional"),
+                        HTML("VAAT Mínimo <br> Simulado"),
+                        uiOutput("regional_vaat"),
                         icon = icon("line-chart"),
                         color = "orange",
                         fill = TRUE
                       ),
                       infoBox(
-                        "VAAT Mínimo",
-                        uiOutput("box_min_vaat_regional"),
+                        HTML("VAAT Mínimo <br> Atual"),
+                        scales::number(8420.96, big.mark = '.', decimal.mark = ','),
                         icon = icon("line-chart"),
                         color = "purple",
                         fill = TRUE
                       ),
                       infoBox(
-                        HTML("VAAF Mínimo"),
-                        uiOutput("box_min_vaaf_regional"),
+                        HTML("VAAT Mínimo <br> Diferença"),
+                        uiOutput('regional_dif_vaat'),
+                        icon = icon("line-chart"),
+                        color = "purple",
+                        fill = TRUE
+                      ),
+                      infoBox(
+                        HTML("VAAF Mínimo <br> Simulado"),
+                        uiOutput("regional_vaaf"),
                         icon = icon("line-chart"),
                         color = "green",
                         fill = TRUE
+                      ),
+                      infoBox(
+                        HTML("VAAF Mínimo <br> Atual"),
+                        scales::number(5361.43, big.mark = '.', decimal.mark = ','),
+                        icon = icon("line-chart"),
+                        color = "green",
+                        fill = TRUE
+                      ),
+                      infoBox(
+                        HTML("VAAF Mínimo <br> Diferença"),
+                        uiOutput('regional_dif_vaaf'),
+                        icon = icon("line-chart"),
+                        color = "green",
+                        fill = TRUE
+                      ),
+                      infoBox(
+                        HTML(paste("Complementação da", br(), "União aos Municípios")),
+                        uiOutput("regional_compl_mun"),
+                        icon = icon("line-chart"),
+                        color = "blue",
+                        fill = TRUE
+                      ),
+                      infoBox(
+                        HTML(paste("Complementação da", br(), "União aos Estados")),
+                        uiOutput("regional_compl_est"),
+                        icon = icon("line-chart"),
+                        color = "aqua",
+                        fill = TRUE
+                      ),
+                      infoBox(
+                        HTML(paste("Percentual dos entes", br(), "que recebem complementação")),
+                        uiOutput("regional_perc_compl"),
+                        icon = icon("line-chart"),
+                        color = "aqua",
+                        fill = TRUE
                       )),
-                      fluidRow(
-                        infoBox(
-                          HTML(paste("Complementação da", br(), "União aos Municípios")),
-                          uiOutput("box_compl_municipal_regional"),
-                          icon = icon("line-chart"),
-                          color = "blue",
-                          fill = TRUE
-                        ),
-                        infoBox(
-                          HTML(paste("Complementação da", br(), "União aos Estados")),
-                          uiOutput("box_compl_estadual_regional"),
-                          icon = icon("line-chart"),
-                          color = "aqua",
-                          fill = TRUE
-                        ),
-                        infoBox(
-                          HTML(paste("Percentual de", br(), "Entes que recebem complementação")),
-                          uiOutput("percentual_complemento_regional"),
-                          icon = icon("line-chart"),
-                          color = "olive",
-                          fill = TRUE
-                        )),
                       h1('Tabela Resumo'),
-                      shinycssloaders::withSpinner(DT::dataTableOutput("tabela_resumo_regional"))))),
+                      shinycssloaders::withSpinner(DT::dataTableOutput("tabela_resumo_regional")),
+                      br()))),
     tabPanel("Documentação", 
              column(2),
              column(8,

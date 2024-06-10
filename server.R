@@ -1,7 +1,11 @@
 # Inicio do Server ----
 server = function(input, output, session) {
-  source('analise_diferenca_simulacoes.R', encoding = 'UTF-8')
-  source('texto_entrada.R', encoding = 'UTF-8')
+  ## Carrega funcoes ----
+  source('r/utils.r', encoding = 'UTF-8')
+  source('r/analise_diferenca_simulacoes.R', encoding = 'UTF-8')
+  source('r/analise_infobox.R', encoding = 'UTF-8')
+  source('r/analise_vencedores_perdedores.R', encoding = 'UTF-8')
+  source('r/texto_entrada.R', encoding = 'UTF-8')
   
   ## Cria sliders para UI ----
   ### VAAF ----
@@ -20,7 +24,7 @@ server = function(input, output, session) {
   ### VAAT ----
   output$pesos_vaat = renderUI({
     lapply(1:length(pesos$etapa), function(i) {
-      numericInput(
+      sliderInput(
         label = paste(i, '-', pesos$nome[[i]]),
         inputId = paste0("pesos_vaat_", i),
         min = 0.8,
@@ -31,7 +35,7 @@ server = function(input, output, session) {
     })
   })
   
-  ## Cria tabela de peso usada no servidor ----
+  ## Cria tabela de peso usada no servidor ----analise_diferenca_simulacoes
   pesos_app = reactive({
     
   ### Estabelece reatividade ----
@@ -58,7 +62,7 @@ server = function(input, output, session) {
 ### Considera simulacao ja realizada para primeira simulacao ----
   simulacao = reactive({
     if (input$botao == 0) {
-      simulacao_base
+      cenario_atual
     } else { 
       simulacao_realizada()}})
   
@@ -98,89 +102,131 @@ server = function(input, output, session) {
 
     simulacao = simulacao[, c('ibge', 'uf', 'nome', 'matriculas_vaaf', 'matriculas_vaat', "inabilitados_vaat", 'nse', 'nf', 'recursos_vaaf', 'recursos_vaat',  'recursos_vaaf_final', 'vaaf_final', 'vaat_pre', 'recursos_vaat_final', 'vaat_final', 'complemento_vaaf', 'complemento_vaat', 'complemento_uniao', 'recursos_fundeb')]
     
+    simulacao$inabilitados_vaat = ifelse(simulacao$inabilitados_vaat, 'Verdadeiro', "Falso")
+    
     simulacao
     
     })
   
 ## Filtro regional
   simulacao_analise_regional = reactive({
-    simulcao_regional = simulacao()[simulacao()$uf %in% input$estado_analise,]
+    simulacao_regional = simulacao()[simulacao()$uf %in% input$estado_analise,]
     
-    simulcao_regional
+    simulacao_regional
   })
   
+## Filtro regional
+simulacao_comparada = reactive({
+  simulacao_comparada = une_simulacao_cenario_atual(simulacao(), cenario_atual)
+    
+    simulacao_comparada
+  })
+  
+## Filtro regional
+simulacao_comparada_regional = reactive({
+  simulacao_comparada_regional = une_simulacao_cenario_atual(simulacao_analise_regional(), cenario_atual)
+    
+    simulacao_comparada_regional
+  })
 ## Valores para Infoboxes ----
 ### Nacional ----
-#### Calcula valor maximo do VAAT para info box ----
-  output$box_max_vaat = renderUI({
-    prettyNum(max(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
-  
-#### Calcula minimo VAAF para info box ----
-  output$box_min_vaaf = renderUI({
-    prettyNum(min(simulacao()$vaaf_final), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
-  
-#### Calcula minimo VAAT para info box ----
-  output$box_min_vaat = renderUI({
-    prettyNum(min(simulacao()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
-  
-#### Calcula total VAAT da complementação municipal ----
-  output$box_compl_municipal = renderUI({
-    prettyNum(sum(simulacao()[simulacao()$ibge > 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
-  
-#### Calcula total VAAT da complementação estadual ----
-  output$box_compl_estadual = renderUI({
-    prettyNum(sum(simulacao()[simulacao()$ibge < 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
-  
-#### Calcula percentual de entes que recebem complementação ----
-  output$percentual_complemento = renderUI({
-    scales::percent(mean(simulacao()$complemento_uniao > 0), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
-  
+#### Calculo ----
+infobox_nacional = reactive({analise_infobox(simulacao_comparada())})
+#### Definição de valores ----
+output$nacional_vaaf = reactive({infobox_nacional()$vaaf_minimo})
+output$nacional_vaat = reactive({infobox_nacional()$vaat_minimo})
+output$nacional_dif_vaaf = reactive({infobox_nacional()$dif_vaaf})
+output$nacional_dif_vaat = reactive({infobox_nacional()$dif_vaat})
+output$nacional_compl_est = reactive({infobox_nacional()$compl_est})
+output$nacional_compl_mun = reactive({infobox_nacional()$compl_mun})
+output$nacional_perc_compl = reactive({infobox_nacional()$perc_compl})
 ### Regional ----
-#### Calcula valor maximo do VAAT para info box ----
-  output$box_max_vaat_regional = renderUI({
-    prettyNum(max(simulacao_analise_regional()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
+#### Calculo ----
+infobox_regional = reactive({analise_infobox(simulacao_comparada())})
+#### Definição de valores ----
+output$regional_vaaf = reactive({infobox_regional()$vaaf_minimo})
+output$regional_vaat = reactive({infobox_regional()$vaat_minimo})
+output$regional_dif_vaaf = reactive({infobox_regional()$dif_vaaf})
+output$regional_dif_vaat = reactive({infobox_regional()$dif_vaat})
+output$regional_compl_est = reactive({infobox_regional()$compl_est})
+output$regional_compl_mun = reactive({infobox_regional()$compl_mun})
+output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
+
+## Simulação UFS ----
+  simulacao_ufs = reactive({
+    simulacao_filtro = simulacao()[simulacao()$inabilitados_vaat == 'Falso' | simulacao()$uf == 'DF',]
+    
+    simulacao_ufs = stats::aggregate(
+      list(VAAF = simulacao_filtro$vaaf_final,
+           VAAT = simulacao_filtro$vaat_final),
+      by = list(uf = simulacao_filtro$uf),
+      FUN=mean)
+    
+    
+    simulacao_ufs$tipo = 'Simulação'
+    
+    simulacao_ufs
   })
   
-#### Calcula minimo VAAF para info box ----
-  output$box_min_vaaf_regional = renderUI({
-    prettyNum(min(simulacao_analise_regional()$vaaf_final), big.mark = ".", decimal.mark = ",", digits = 4)
+  ## Gráfico com complementação da união por UF e tipo de complementação ----
+  output$graf_vaaf_ufs = plotly::renderPlotly({
+    ### Calculo do complementacao por unidade da federação ----
+    simulacao_ufs = simulacao_ufs()
+    
+    simulacao_ufs$uf = factor(simulacao_ufs$uf, simulacao_ufs$uf[order(simulacao_ufs$VAAF)])
+    
+    simulacao_ufs = rbind(simulacao_ufs, cenario_ufs_atual)
+    
+    ### Plotly ----    
+    fig = plot_ly(
+      simulacao_ufs,
+      x = ~uf,
+      y = ~VAAF,
+      color = ~tipo,
+      type = "bar",
+      meta = ~tipo,
+      hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} reais<extra></extra>"
+    )
+    
+    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
+    ### Retorna figura  
+    fig 
   })
   
-#### Calcula minimo VAAT para info box ----
-  output$box_min_vaat_regional = renderUI({
-    prettyNum(min(simulacao_analise_regional()$vaat_final), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
   
-#### Calcula total VAAT da complementação municipal ----
-  output$box_compl_municipal_regional = renderUI({
-    prettyNum(sum(simulacao_analise_regional()[simulacao_analise_regional()$ibge > 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
-  
-#### Calcula total VAAT da complementação estadual ----
-  output$box_compl_estadual_regional = renderUI({
-    prettyNum(sum(simulacao_analise_regional()[simulacao_analise_regional()$ibge < 100,]$complemento_uniao), big.mark = ".", decimal.mark = ",", digits = 4)
-  })
-  
-#### Calcula percentual de entes que recebem complementação ----
-  output$percentual_complemento_regional = renderUI({
-    scales::percent(mean(simulacao_analise_regional()$complemento_uniao > 0), big.mark = ".", decimal.mark = ",", digits = 4)
+  ## Gráfico com complementação da união por UF e tipo de complementação ----
+  output$graf_vaat_ufs = plotly::renderPlotly({
+    ### Calculo do complementacao por unidade da federação ----
+    simulacao_ufs = simulacao_ufs()
+    
+    simulacao_ufs$uf = factor(simulacao_ufs$uf, simulacao_ufs$uf[order(simulacao_ufs$VAAT)])
+    
+    simulacao_ufs = rbind(simulacao_ufs, cenario_ufs_atual)
+    
+    ### Plotly ----    
+    fig = plot_ly(
+      simulacao_ufs,
+      x = ~uf,
+      y = ~VAAT,
+      color = ~tipo,
+      type = "bar",
+      meta = ~tipo,
+      hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} reais<extra></extra>"
+    )
+    
+    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Complementação da União por UF e Modalidade<b>")
+    ### Retorna figura  
+    fig 
   })
   
 ## Gráfico com complementação da união por UF e tipo de complementação ----
   output$graf_complementacao_modalidade = plotly::renderPlotly({
 ### Calculo do complementacao por unidade da federação ----
-    simulacao = simulacao()
     
     complementacao_uf = stats::aggregate(
-      list(complemento_vaaf = simulacao$complemento_vaaf,
-           complemento_vaat = simulacao$complemento_vaat),
-           by = list(uf = simulacao$uf),
+      list(complemento_vaaf = simulacao()$complemento_vaaf,
+           complemento_vaat = simulacao()$complemento_vaat),
+           by = list(uf = simulacao()$uf),
       FUN=sum)
     
     complementacao_uf = complementacao_uf[order((complementacao_uf$complemento_vaaf + complementacao_uf$complemento_vaat) * -1),]
@@ -209,12 +255,11 @@ server = function(input, output, session) {
   ## Gráfico com complementação da união por UF e destino da complementação ----
   output$graf_complementacao_destino = plotly::renderPlotly({
     ### Calculo do complementacao por unidade da federação ----
-    simulacao = simulacao()
     
     complementacao_uf = stats::aggregate(
-      list(complemento = simulacao$complemento_vaaf + simulacao$complemento_vaat),
-      by = list(uf = simulacao$uf,
-                tipo = ifelse(simulacao$ibge < 100, 'Estado', 'Município')),
+      list(complemento = simulacao()$complemento_vaaf + simulacao()$complemento_vaat),
+      by = list(uf = simulacao()$uf,
+                tipo = ifelse(simulacao()$ibge < 100, 'Estado', 'Município')),
       FUN=sum)
     
     complementacao_ordem = stats::aggregate(
@@ -241,14 +286,13 @@ server = function(input, output, session) {
   
 ## Grafico diferença ----
   output$graf_diff_uf = renderPlotly({
-    simulacao_atual = simulacao()
     
-    complementacao_atual = stats::aggregate(
-      list(complemento_atual = simulacao_atual$complemento_uniao),
-      by = list(uf = simulacao_atual$uf),
+    simulacao_agregada = stats::aggregate(
+      list(complemento_atual = simulacao()$complemento_uniao),
+      by = list(uf = simulacao()$uf),
       FUN=sum)
     
-    comparacao = merge(complementacao_atual, simulacao_base_agregada, by = 'uf')
+    comparacao = merge(simulacao_agregada, cenario_atual_agregada, by = 'uf')
     
     comparacao$diff = comparacao$complemento_atual - comparacao$complemento_uniao
     
@@ -258,7 +302,7 @@ server = function(input, output, session) {
     fig = plot_ly(
       comparacao,
       x = ~uf,
-      y = ~diff/1000000,
+      y = ~round(diff/1000000),
       type = "bar",
       hovertemplate = "UF: %{label}<br>Diferença: %{y:,.0f} milhões<extra></extra>"
     )
@@ -272,21 +316,29 @@ server = function(input, output, session) {
   
   ## Grafico diferença ----
   tabela_resumo = reactive({
-    analise_diferenca_simulacoes(simulacao(), simulacao_base)
+    tabela_resumo = analise_diferenca_simulacoes(simulacao_comparada())
+    
+    tabela_resumo
   })
   
   ## Grafico diferença ----
   tabela_resumo_regional = reactive({
-    analise_diferenca_simulacoes(simulacao_analise_regional(), simulacao_base)
+    tabela_resumo_regional = analise_diferenca_simulacoes(simulacao_comparada_regional())
+    
+    tabela_resumo_regional
   })  
   
   
 ## Define tabela final a ser enviada para o usuário ----
   tabela_final = reactive({
-    tabela = dplyr::left_join(simulacao(), simulacao_base, by = c('ibge', 'nome', 'uf'), suffix = c('_simulacao', '_base'))
-    
-    
+    if (input$botao == 0) {
+      names(cenario_atual) = c('ibge', 'uf', 'nome', paste0(names(cenario_atual)[4:19], '_atual'))
+      tabela = cenario_atual
+    } else {
+      tabela = simulacao_comparada()
+    }
     tabela
+    
   })
   
 ## Tabela DT ----
