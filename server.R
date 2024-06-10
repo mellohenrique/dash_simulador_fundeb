@@ -1,11 +1,11 @@
 # Inicio do Server ----
 server = function(input, output, session) {
   ## Carrega funcoes ----
-  source('r/utils.r', encoding = 'UTF-8')
-  source('r/analise_diferenca_simulacoes.R', encoding = 'UTF-8')
-  source('r/analise_infobox.R', encoding = 'UTF-8')
-  source('r/analise_vencedores_perdedores.R', encoding = 'UTF-8')
-  source('r/texto_entrada.R', encoding = 'UTF-8')
+  source('analise_diferenca_simulacoes.R', encoding = 'UTF-8')
+  source('analise_infobox.R', encoding = 'UTF-8')
+  source('analise_vencedores_perdedores.R', encoding = 'UTF-8')
+  source('texto_entrada.R', encoding = 'UTF-8')
+  source('utils.R', encoding = 'UTF-8')
   
   ## Cria sliders para UI ----
   ### VAAF ----
