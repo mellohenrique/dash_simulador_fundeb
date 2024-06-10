@@ -12,13 +12,13 @@ analise_vencedores_perdedores = function(simulacao_comparada){
   
   
   tabela_vaaf = dplyr::group_by(df, `Resultado VAAF`, Região) |>
-    dplyr::summarise(Entes = n(),
+    dplyr::summarise(Entes = dplyr::n(),
                      `Média` = scales::percent(mean(dif_vaaf), accuracy = .01, decimal.mark = ',', big.mark = '.'),
                      `Máximo` = scales::percent(max(abs(dif_vaaf)), accuracy = .01, decimal.mark = ',', big.mark = '.'),
                      `Mínimo` = scales::percent(min(abs(dif_vaaf)), accuracy = .01, decimal.mark = ',', big.mark = '.'))
   
   tabela_vaat = dplyr::group_by(df, `Resultado VAAT`, Região) |>
-    dplyr::summarise(Entes = n(),
+    dplyr::summarise(Entes = dplyr::n(),
                      `Média` = scales::percent(mean(dif_vaat), accuracy = .01, decimal.mark = ',', big.mark = '.'),
                      `Máximo` = scales::percent(max(abs(dif_vaat)), accuracy = .01, decimal.mark = ',', big.mark = '.'),
                      `Mínimo` = scales::percent(min(abs(dif_vaat)), accuracy = .01, decimal.mark = ',', big.mark = '.'))
