@@ -18,8 +18,8 @@ analise_infobox = function(simulacao_comparada){
     vaat_minimo =  prettyNum(vaat_minimo_simulacao, big.mark = ".", decimal.mark = ",", digits = 2),
     dif_vaaf =  scales::percent(dif_vaaf_minimo, big.mark = ".", decimal.mark = ",", accuracy = .01),
     dif_vaat =  scales::percent(dif_vaat_minimo, big.mark = ".", decimal.mark = ",", accuracy = .01),
-    compl_est = prettyNum(complementacao_municipios, big.mark = ".", decimal.mark = ",", digits = 4),
-    compl_mun = prettyNum(complementacao_estado, big.mark = ".", decimal.mark = ",", digits = 4),
+    compl_est = prettyNum(complementacao_estado, big.mark = ".", decimal.mark = ",", digits = 4),
+    compl_mun = prettyNum(complementacao_municipios, big.mark = ".", decimal.mark = ",", digits = 4),
     perc_compl = scales::percent(entes_complementados, big.mark = ".", decimal.mark = ",", accuracy = .01)
   )
   
