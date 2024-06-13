@@ -99,8 +99,8 @@ server = function(input, output, session) {
       dados_matriculas = matriculas,
       dados_complementar = complementar,
       dados_peso = pesos_app(),
-      complementacao_vaaf = 24153287047,
-      complementacao_vaat = 18114965285,
+      complementacao_vaaf = input$complementacao_vaaf,
+      complementacao_vaat = input$complementacao_vaat,
       complementacao_vaar = 0,
       max_nse = input$nse,
       min_nse = 1,
@@ -200,7 +200,7 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} reais<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Comparação do VAAF da simulação com o cenário atual<b>")
+    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f'), title = "<b>Comparação do VAAF da simulação com o cenário atual<b>")
     ### Retorna figura  
     fig 
   })
@@ -226,7 +226,7 @@ output$regional_perc_compl = reactive({infobox_regional()$perc_compl})
       hovertemplate = "UF: %{label}<br>%{meta[0]}: %{y:,.0f} reais<extra></extra>"
     )
     
-    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f', ticksuffix= " milhões"), title = "<b>Comparação do VAAT da simulação com o cenário atual<b>")
+    fig =  layout(fig, separators = ',.', xaxis = list(title = "", tickangle = 0), yaxis = list(title = "Montante", tickformat = ',.f'), title = "<b>Comparação do VAAT da simulação com o cenário atual<b>")
     ### Retorna figura  
     fig 
   })

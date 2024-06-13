@@ -258,7 +258,7 @@ ui = tagList(
                     withMathJax(
                       shiny::includeMarkdown("documentacao.md")
                     ))),
-    tabPanel("Tabela - Simulação",
+    tabPanel("Planilha de Resultados",
              column(2,
                     ### Botão de download do dicionário de dados ----
                     downloadButton('dicionario', "Dicionário de dados", style='font-size:150%;heigth:200%;width:100%;color:white')),

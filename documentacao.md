@@ -1,6 +1,4 @@
-# Aplicativo Simulador Fundeb
-
-## Introdução
+# Simulador de Fatores de Ponderação do Fundeb
 
 O Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação (Fundeb) é o principal mecanismo de financiamento da educação básica no Brasil, fundamentado no Art. 212-A da Constituição Federal e regulamentado pela Lei nº 14.113, de 25 de dezembro de 2020.
 
